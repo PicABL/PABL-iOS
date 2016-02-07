@@ -7,8 +7,11 @@
 //
 
 #import "ViewController.h"
+#import "PABLMapView.h"
 
 @interface ViewController ()
+
+@property (nonatomic, strong) PABLMapView *pablMapView;
 
 @end
 
@@ -16,12 +19,15 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    self.view = self.pablMapView;
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (PABLMapView *)pablMapView {
+    if (_pablMapView == nil) {
+        _pablMapView = [[PABLMapView alloc]init];
+    }
+    return _pablMapView;
 }
+
 
 @end
