@@ -7,11 +7,12 @@
 //
 
 #import "ViewController.h"
-#import "PABLMapView.h"
+#import "PABLMenuViewController.h"
 
-@interface ViewController ()
+@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate>
 
-@property (nonatomic, strong) PABLMapView *pablMapView;
+@property (nonatomic, strong) MKMapView *mapView;
+@property (nonatomic, strong) PABLMenuViewController *menuView;
 
 @end
 
@@ -19,15 +20,32 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view = self.pablMapView;
+    [self.view addSubview:self.mapView];
+    [self.mapView setFrame:self.view.frame];
 }
 
-- (PABLMapView *)pablMapView {
-    if (_pablMapView == nil) {
-        _pablMapView = [[PABLMapView alloc]init];
+- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event {
+    if (motion == UIEventSubtypeMotionShake) {
+        [self presentViewController:self.menuView animated:YES completion:^{
+            
+        }];
     }
-    return _pablMapView;
 }
 
+
+- (MKMapView *)mapView {
+    if (_mapView == nil) {
+        _mapView = [[MKMapView alloc]init];
+        [_mapView setDelegate:self];
+    }
+    return _mapView;
+}
+
+- (PABLMenuViewController *)menuView {
+    if(_menuView == nil) {
+        _menuView = [[PABLMenuViewController alloc]initWithViewCOntroller:self];
+    }
+    return _menuView;
+}
 
 @end
