@@ -12,7 +12,9 @@
 #define MENU_BUTTON_SIZE 40.0f
 #define MENU_BUTTON_PADDING 20.0f
 
-@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate>
+@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+
+@property (nonatomic, strong) UIView *welcomeView;
 
 @property (nonatomic, strong) UIView *menuSpreadButton;
 @property (nonatomic, strong) UIView *animationView;
@@ -29,6 +31,7 @@
     [self.view addSubview:self.mapView];
     [self.mapView addSubview:self.menuSpreadButton];
     [self.mapView addSubview:self.animationView];
+    [self.view addSubview:self.welcomeView];
     
     UITapGestureRecognizer *tapGestuer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(menuSpreadButtonTouched)];
     [self.menuSpreadButton addGestureRecognizer:tapGestuer];
@@ -38,15 +41,25 @@
                                               CGRectGetMaxY(mapViewFrame) - MENU_BUTTON_SIZE - MENU_BUTTON_PADDING,
                                               MENU_BUTTON_SIZE,
                                               MENU_BUTTON_SIZE);
+    CGRect welcomeViewFrame = self.view.frame;
     
     [self.mapView setFrame:mapViewFrame];
     [self.menuSpreadButton setFrame:menuSpreadButtonFrame];
+    [self.welcomeView setFrame:welcomeViewFrame];
     
     [self.menuSpreadButton.layer setCornerRadius:MENU_BUTTON_SIZE/2];
+    
+    [NSTimer scheduledTimerWithTimeInterval:2.0f target:self selector:@selector(dismissWelcomeView) userInfo:nil repeats:NO];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+}
+
+- (void)dismissWelcomeView {
+    [UIView animateWithDuration:0.5f animations:^{
+        [self.welcomeView setAlpha:0.0f];
+    }];
 }
 
 #pragma mark - touch event
@@ -99,7 +112,22 @@
     }];
 }
 
+#pragma mark - UIImagePickerControllerDelegate
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [self.menuView closeMenuViewController];
+}
+
+
 #pragma mark - Generators
+
+- (UIView *)welcomeView {
+    if (_welcomeView == nil) {
+        _welcomeView = [[UIView alloc]init];
+        [_welcomeView setBackgroundColor:HEXCOLOR(0x5CD1E5FF)];
+    }
+    return _welcomeView;
+}
 
 - (UIView *)menuSpreadButton {
     if (_menuSpreadButton == nil) {
@@ -121,8 +149,10 @@
 
 - (PABLMenuViewController *)menuView {
     if(_menuView == nil) {
-        _menuView = [[PABLMenuViewController alloc]initWithViewCOntroller:self];
+        _menuView = [[PABLMenuViewController alloc]initWithViewController:self];
         [_menuView setDelegate:self];
+        [_menuView setPABLDelegate:self];
+        [_menuView setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     }
     return _menuView;
 }
@@ -130,7 +160,7 @@
 - (UIView *)animationView {
     if (_animationView == nil) {
         _animationView = [[UIView alloc]init];
-        [_animationView setBackgroundColor:HEXCOLOR(0xFFFFFFFF)];
+        [_animationView setBackgroundColor:HEXCOLOR(0x000000FF)];
     }
     return _animationView;
 }

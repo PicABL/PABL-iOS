@@ -14,10 +14,11 @@
 
 @end
 
-@interface PABLMenuViewController : UIViewController
+@interface PABLMenuViewController : UIImagePickerController
 
-@property (nonatomic, strong) id<PABLMenuViewControllerDelegate> delegate;
+@property (nonatomic, strong) id<PABLMenuViewControllerDelegate> PABLDelegate;
 
-- (instancetype)initWithViewCOntroller:(UIViewController *)viewController;
+- (instancetype)initWithViewController:(UIViewController *)viewController;
+- (void)closeMenuViewController;
 
 @end
