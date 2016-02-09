@@ -21,8 +21,23 @@
     if (self = [super init]) {
         [self.view setFrame:viewController.view.frame];
         [self.view addSubview:self.pablMenuView];
+        [self.view setBackgroundColor:[UIColor whiteColor]];
     }
     return self;
+}
+
+- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event {
+    if (motion == UIEventSubtypeMotionShake) {
+        [UIView animateWithDuration:0.3f animations:^{
+            [self.pablMenuView setAlpha:0.0f];
+        } completion:^(BOOL finished) {
+            [self dismissViewControllerAnimated:NO completion:^{
+                if (self.delegate && [self.delegate respondsToSelector:@selector(PABLMenuViewControllerDidTouchCloseButton)]) {
+                    [self.delegate PABLMenuViewControllerDidTouchCloseButton];
+                }
+            }];
+        }];
+    }
 }
 
 - (void)viewDidLoad {
@@ -30,12 +45,12 @@
     [self.pablMenuView setFrame:self.view.frame];
 }
 
-- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event {
-    if (motion == UIEventSubtypeMotionShake) {
-        [self dismissViewControllerAnimated:YES completion:^{
-            
-        }];
-    }
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.pablMenuView setAlpha:0.0f];
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.pablMenuView setAlpha:1.0f];
+    }];
 }
 
 - (PABLMenuView *)pablMenuView {

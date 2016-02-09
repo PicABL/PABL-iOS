@@ -8,7 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol PABLMenuViewControllerDelegate <NSObject>
+
+- (void)PABLMenuViewControllerDidTouchCloseButton;
+
+@end
+
 @interface PABLMenuViewController : UIViewController
+
+@property (nonatomic, strong) id<PABLMenuViewControllerDelegate> delegate;
 
 - (instancetype)initWithViewCOntroller:(UIViewController *)viewController;
 
