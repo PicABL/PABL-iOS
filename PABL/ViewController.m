@@ -11,7 +11,7 @@
 
 #define MENU_BUTTON_SIZE 40.0f
 #define MENU_BUTTON_PADDING 20.0f
-#define TITLE_VIEW_HEIGHT 40.0f
+#define TITLE_VIEW_HEIGHT 60.0f
 #define ALERT_LABEL_WIDTH 200.0f
 #define ALERT_LABEL_HEIGHT 10.0f
 
@@ -149,13 +149,13 @@
         [self.mapView addSubview:alertLabel];
         CGRect alertLabelMoveFrame = alertLabel.frame;
         alertLabelMoveFrame.origin.y -= ALERT_LABEL_HEIGHT;
-        [UIView animateWithDuration:0.5f animations:^{
+        [UIView animateWithDuration:1.0f animations:^{
             [alertLabel setAlpha:1.0f];
             [alertLabel setFrame:alertLabelMoveFrame];
         } completion:^(BOOL finished) {
             CGRect alertLabelMoveFrame = alertLabel.frame;
             alertLabelMoveFrame.origin.y -= ALERT_LABEL_HEIGHT;
-            [UIView animateWithDuration:0.5f animations:^{
+            [UIView animateWithDuration:1.0f animations:^{
                 [alertLabel setAlpha:0.0f];
                 [alertLabel setFrame:alertLabelMoveFrame];
             } completion:^(BOOL finished) {
