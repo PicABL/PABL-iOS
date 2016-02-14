@@ -29,6 +29,10 @@
 
 @property (nonatomic, assign) BOOL isMine;
 
+@property (nonatomic, strong) NSMutableArray *photoArray;
+@property (nonatomic, strong) PHCachingImageManager *imageManager;
+@property (nonatomic, strong) PHImageRequestOptions *imageOptions;
+
 @end
 
 @implementation ViewController
@@ -70,6 +74,37 @@
     [self.menuSpreadButton addGestureRecognizer:tapGesture];
     UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPressTest:)];
     [self.menuSpreadButton addGestureRecognizer:longPressGesture];
+    
+    [self getAllPhotosFromAllAlbums];
+}
+
+- (void)getAllPhotosFromAllAlbums {
+    NSMutableArray *albumArray = [NSMutableArray array];
+    PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil];
+    [smartAlbums enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
+        [albumArray addObject:assetCollection];
+    }];
+    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
+    [topLevelUserCollections enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
+        [albumArray addObject:assetCollection];
+    }];
+    
+    self.photoArray = [[NSMutableArray alloc]init];
+    for (PHAssetCollection *album in albumArray) {
+        @try {
+            PHFetchOptions *option = [PHFetchOptions new];
+            [option setPredicate:[NSPredicate predicateWithFormat:@"mediaType == %d or mediaType == %d", PHAssetMediaTypeImage, PHAssetMediaTypeVideo]];
+            PHFetchResult *assetsFetchResults = [PHAsset fetchAssetsInAssetCollection:album options:option];
+            for (PHAsset *photo in assetsFetchResults) {
+                [self.photoArray addObject:photo];
+            }
+        }
+        @catch (NSException *exception) {
+            NSLog(@"exception : %@",exception);
+        }
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -77,6 +112,43 @@
     if (self.isMine) {
         [self setTitleNameWithString:@"Mine"];
     }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    PHAsset *pic1 = [self.photoArray objectAtIndex:0];
+    [self.imageManager requestImageForAsset:pic1
+                                 targetSize:CGSizeMake(50, 50)
+                                contentMode:PHImageContentModeAspectFill
+                                    options:self.imageOptions
+                              resultHandler:^(UIImage *result, NSDictionary *info) {
+                                  UIImageView *imageViewTest = [[UIImageView alloc]initWithFrame:CGRectMake(150, 150, 50, 50)];
+                                  [imageViewTest setImage:result];
+                                  [self.mapView addSubview:imageViewTest];
+                              }];
+    
+    PHAsset *pic2 = [self.photoArray objectAtIndex:1];
+    [self.imageManager requestImageForAsset:pic2
+                                 targetSize:CGSizeMake(50, 50)
+                                contentMode:PHImageContentModeAspectFill
+                                    options:self.imageOptions
+                              resultHandler:^(UIImage *result, NSDictionary *info) {
+                                  UIImageView *imageViewTest = [[UIImageView alloc]initWithFrame:CGRectMake(250, 250, 50, 50)];
+                                  [imageViewTest setImage:result];
+                                  [self.mapView addSubview:imageViewTest];
+                              }];
+    
+    PHAsset *pic3 = [self.photoArray objectAtIndex:2];
+    [self.imageManager requestImageForAsset:pic3
+                                 targetSize:CGSizeMake(50, 50)
+                                contentMode:PHImageContentModeAspectFill
+                                    options:self.imageOptions
+                              resultHandler:^(UIImage *result, NSDictionary *info) {
+                                  UIImageView *imageViewTest = [[UIImageView alloc]initWithFrame:CGRectMake(50, 350, 50, 50)];
+                                  [imageViewTest setImage:result];
+                                  [self.mapView addSubview:imageViewTest];
+                              }];
 }
 
 - (void)dismissWelcomeView {
@@ -254,6 +326,23 @@
         [_animationView setBackgroundColor:HEXCOLOR(0xFFFFFFFF)];
     }
     return _animationView;
+}
+
+- (PHCachingImageManager *)imageManager {
+    if (_imageManager == nil) {
+        self.imageManager = [[PHCachingImageManager alloc] init];
+    }
+    return _imageManager;
+}
+
+- (PHImageRequestOptions *)imageOptions {
+    if (_imageOptions == nil) {
+        _imageOptions = [[PHImageRequestOptions alloc] init];
+        [_imageOptions setSynchronous:YES];
+        [_imageOptions setVersion:PHImageRequestOptionsVersionCurrent];
+        [_imageOptions setResizeMode:PHImageRequestOptionsResizeModeNone];
+    }
+    return _imageOptions;
 }
 
 @end
