@@ -15,7 +15,7 @@
 #define ALERT_LABEL_WIDTH 200.0f
 #define ALERT_LABEL_HEIGHT 10.0f
 
-@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate>
 
 @property (nonatomic, strong) UIView *welcomeView;
 
@@ -40,8 +40,8 @@
     
     [self.view addSubview:self.mapView];
     [self.mapView addSubview:self.menuSpreadButton];
-    [self.mapView addSubview:self.animationView];
     [self.mapView addSubview:self.titleView];
+    [self.mapView addSubview:self.animationView];
     [self.titleView addSubview:self.titleLabel];
     [self.view addSubview:self.welcomeView];
     
@@ -191,13 +191,6 @@
     }];
 }
 
-#pragma mark - UIImagePickerControllerDelegate
-
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    [self.menuView closeMenuViewController];
-}
-
-
 #pragma mark - Generators
 
 - (UIView *)welcomeView {
@@ -251,8 +244,6 @@
     if(_menuView == nil) {
         _menuView = [[PABLMenuViewController alloc]initWithViewController:self];
         [_menuView setDelegate:self];
-        [_menuView setPABLDelegate:self];
-        [_menuView setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     }
     return _menuView;
 }
@@ -260,7 +251,7 @@
 - (UIView *)animationView {
     if (_animationView == nil) {
         _animationView = [[UIView alloc]init];
-        [_animationView setBackgroundColor:HEXCOLOR(0x000000FF)];
+        [_animationView setBackgroundColor:HEXCOLOR(0xFFFFFFFF)];
     }
     return _animationView;
 }

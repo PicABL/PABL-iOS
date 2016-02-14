@@ -8,7 +8,9 @@
 
 #import "PABLMenuViewController.h"
 
-@interface PABLMenuViewController ()
+@interface PABLMenuViewController () <PABLMenuViewDelegate>
+
+@property (nonatomic, strong) PABLMenuView *pablMenuView;
 
 @end
 
@@ -17,33 +19,52 @@
 - (instancetype)initWithViewController:(UIViewController *)viewController {
     if (self = [super init]) {
         [self.view setFrame:viewController.view.frame];
+        [self.view addSubview:self.pablMenuView];
+        [self.view setBackgroundColor:[UIColor whiteColor]];
     }
     return self;
 }
 
 - (void)closeMenuViewController {
     [UIView animateWithDuration:0.3f animations:^{
-        [self.view setAlpha:0.0f];
+        [self.pablMenuView setAlpha:0.0f];
     } completion:^(BOOL finished) {
         [self dismissViewControllerAnimated:NO completion:^{
-            if (self.PABLDelegate && [self.delegate respondsToSelector:@selector(PABLMenuViewControllerDidTouchCloseButton)]) {
-                [self.PABLDelegate PABLMenuViewControllerDidTouchCloseButton];
+            if (self.delegate && [self.delegate respondsToSelector:@selector(PABLMenuViewControllerDidTouchCloseButton)]) {
+                [self.delegate PABLMenuViewControllerDidTouchCloseButton];
             }
         }];
     }];
 }
 
-- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
-    [super dismissViewControllerAnimated:flag completion:completion];
-}
-
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.view setAlpha:0.0f];
+    [self.pablMenuView setFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame))];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self.pablMenuView setAlpha:0.0f];
     [UIView animateWithDuration:0.3f animations:^{
-        [self.view setAlpha:1.0f];
+        [self.pablMenuView setAlpha:1.0f];
     }];
+}
+
+#pragma mark - PABLMenuViewDelegate
+
+- (void)didTouchedCloseButton {
+    [self closeMenuViewController];
+}
+
+#pragma mark - generators
+
+- (PABLMenuView *)pablMenuView {
+    if (_pablMenuView == nil) {
+        _pablMenuView = [[PABLMenuView alloc]init];
+        [_pablMenuView setDelegate:self];
+    }
+    return _pablMenuView;
 }
 
 

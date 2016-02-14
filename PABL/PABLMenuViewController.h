@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PABLMenuView.h"
 
 @protocol PABLMenuViewControllerDelegate <NSObject>
 
@@ -14,9 +15,9 @@
 
 @end
 
-@interface PABLMenuViewController : UIImagePickerController
+@interface PABLMenuViewController : UIViewController
 
-@property (nonatomic, strong) id<PABLMenuViewControllerDelegate> PABLDelegate;
+@property (nonatomic, strong) id<PABLMenuViewControllerDelegate> delegate;
 
 - (instancetype)initWithViewController:(UIViewController *)viewController;
 - (void)closeMenuViewController;
