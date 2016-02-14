@@ -27,11 +27,11 @@
 @property (nonatomic, strong) MKMapView *mapView;
 @property (nonatomic, strong) PABLMenuViewController *menuView;
 
-@property (nonatomic, assign) BOOL isMine;
-
 @property (nonatomic, strong) NSMutableArray *photoArray;
 @property (nonatomic, strong) PHCachingImageManager *imageManager;
 @property (nonatomic, strong) PHImageRequestOptions *imageOptions;
+
+@property (nonatomic, assign) BOOL isMine;
 
 @end
 
@@ -116,39 +116,6 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    
-    PHAsset *pic1 = [self.photoArray objectAtIndex:0];
-    [self.imageManager requestImageForAsset:pic1
-                                 targetSize:CGSizeMake(50, 50)
-                                contentMode:PHImageContentModeAspectFill
-                                    options:self.imageOptions
-                              resultHandler:^(UIImage *result, NSDictionary *info) {
-                                  UIImageView *imageViewTest = [[UIImageView alloc]initWithFrame:CGRectMake(150, 150, 50, 50)];
-                                  [imageViewTest setImage:result];
-                                  [self.mapView addSubview:imageViewTest];
-                              }];
-    
-    PHAsset *pic2 = [self.photoArray objectAtIndex:1];
-    [self.imageManager requestImageForAsset:pic2
-                                 targetSize:CGSizeMake(50, 50)
-                                contentMode:PHImageContentModeAspectFill
-                                    options:self.imageOptions
-                              resultHandler:^(UIImage *result, NSDictionary *info) {
-                                  UIImageView *imageViewTest = [[UIImageView alloc]initWithFrame:CGRectMake(250, 250, 50, 50)];
-                                  [imageViewTest setImage:result];
-                                  [self.mapView addSubview:imageViewTest];
-                              }];
-    
-    PHAsset *pic3 = [self.photoArray objectAtIndex:2];
-    [self.imageManager requestImageForAsset:pic3
-                                 targetSize:CGSizeMake(50, 50)
-                                contentMode:PHImageContentModeAspectFill
-                                    options:self.imageOptions
-                              resultHandler:^(UIImage *result, NSDictionary *info) {
-                                  UIImageView *imageViewTest = [[UIImageView alloc]initWithFrame:CGRectMake(50, 350, 50, 50)];
-                                  [imageViewTest setImage:result];
-                                  [self.mapView addSubview:imageViewTest];
-                              }];
 }
 
 - (void)dismissWelcomeView {
@@ -159,6 +126,48 @@
 
 - (void)setTitleNameWithString:(NSString *)titleName {
     [self.titleLabel setText:titleName];
+}
+
+#pragma mark - Methods
+
+- (CGPoint)getCenterPositionWithLocation:(CGPoint)location {
+    CGPoint result = CGPointZero;
+    
+    return result;
+}
+
+
+#pragma mark - Map Action
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
+    CGPoint leftCorner = CGPointZero;
+    leftCorner.x = mapView.region.center.latitude - mapView.region.span.latitudeDelta/2;
+    leftCorner.y = mapView.region.center.longitude - mapView.region.span.longitudeDelta/2;
+    
+//    if (self.photoArray) {
+//        for (PHAsset *photo in self.photoArray) {
+//            [self.imageManager requestImageDataForAsset:photo
+//                                                options:self.imageOptions
+//                                          resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+//                                              if (imageData) {
+//                                                  CGImageSourceRef source = CGImageSourceCreateWithData((CFMutableDataRef)imageData, NULL);
+//                                                  if (source) {
+//                                                      NSDictionary *metadata = (NSDictionary *)CFBridgingRelease(CGImageSourceCopyPropertiesAtIndex(source,0,NULL));
+//                                                      if (metadata && metadata[@"{GPS}"] && metadata[@"{GPS}"][@"Latitude"] && metadata[@"{GPS}"][@"Longitude"]){
+//                                                      }
+//                                                  }
+//                                              }
+//                                          }];
+//        }
+//    }
+}
+
+- (void)updateMapZoomLocation:(CLLocation *)newLocation withSpan:(MKCoordinateSpan)span {
+    MKCoordinateRegion region;
+    region.center.latitude = newLocation.coordinate.latitude;
+    region.center.longitude = newLocation.coordinate.longitude;
+    region.span.latitudeDelta = span.latitudeDelta;
+    region.span.longitudeDelta = span.longitudeDelta;
+    [self.mapView setRegion:region animated:YES];
 }
 
 #pragma mark - touch event
