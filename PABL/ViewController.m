@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "PABLMenuViewController.h"
+#import "PABLPhoto.h"
 
 #define MENU_BUTTON_SIZE 40.0f
 #define MENU_BUTTON_PADDING 20.0f
@@ -26,10 +27,6 @@
 @property (nonatomic, strong) UIView *animationView;
 @property (nonatomic, strong) MKMapView *mapView;
 @property (nonatomic, strong) PABLMenuViewController *menuView;
-
-@property (nonatomic, strong) NSMutableArray *photoArray;
-@property (nonatomic, strong) PHCachingImageManager *imageManager;
-@property (nonatomic, strong) PHImageRequestOptions *imageOptions;
 
 @property (nonatomic, assign) BOOL isMine;
 
@@ -74,38 +71,9 @@
     [self.menuSpreadButton addGestureRecognizer:tapGesture];
     UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPressTest:)];
     [self.menuSpreadButton addGestureRecognizer:longPressGesture];
-    
-    [self getAllPhotosFromAllAlbums];
 }
 
-- (void)getAllPhotosFromAllAlbums {
-    NSMutableArray *albumArray = [NSMutableArray array];
-    PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary options:nil];
-    [smartAlbums enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
-        [albumArray addObject:assetCollection];
-    }];
-    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
-    [topLevelUserCollections enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
-        [albumArray addObject:assetCollection];
-    }];
-    
-    self.photoArray = [[NSMutableArray alloc]init];
-    for (PHAssetCollection *album in albumArray) {
-        @try {
-            PHFetchOptions *option = [PHFetchOptions new];
-            [option setPredicate:[NSPredicate predicateWithFormat:@"mediaType == %d or mediaType == %d", PHAssetMediaTypeImage, PHAssetMediaTypeVideo]];
-            PHFetchResult *assetsFetchResults = [PHAsset fetchAssetsInAssetCollection:album options:option];
-            for (PHAsset *photo in assetsFetchResults) {
-                [self.photoArray addObject:photo];
-            }
-        }
-        @catch (NSException *exception) {
-            NSLog(@"exception : %@",exception);
-        }
-    }
-}
+
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -121,6 +89,11 @@
 - (void)dismissWelcomeView {
     [UIView animateWithDuration:0.5f animations:^{
         [self.welcomeView setAlpha:0.0f];
+    } completion:^(BOOL finished) {
+        CGPoint leftCorner = CGPointZero;
+        leftCorner.x = self.mapView.region.center.latitude - self.mapView.region.span.latitudeDelta/2;
+        leftCorner.y = self.mapView.region.center.longitude - self.mapView.region.span.longitudeDelta/2;
+        [self refreshPhotoViewOnMapWithLeftCorner:leftCorner withSpan:self.mapView.region.span];
     }];
 }
 
@@ -136,6 +109,48 @@
     return result;
 }
 
+- (void)refreshPhotoViewOnMapWithLeftCorner:(CGPoint)leftCorner withSpan:(MKCoordinateSpan)span {
+    NSInteger num = 0;
+    for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
+        if (photo.isAdded == NO) {
+            CGFloat latitude = [photo.metaData[@"{GPS}"][@"Latitude"] floatValue];
+            CGFloat longitude = [photo.metaData[@"{GPS}"][@"Longitude"] floatValue];
+            if (leftCorner.x <= latitude && leftCorner.y <= longitude &&
+                leftCorner.x + span.latitudeDelta >= latitude && leftCorner.y + span.longitudeDelta >= longitude) {
+                MKPointAnnotation *annotation = [[MKPointAnnotation alloc]init];
+                CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
+                [annotation setCoordinate:coordinate];
+                annotation.title = [NSString stringWithFormat:@"%ld",num];
+                [self.mapView addAnnotation:annotation];
+            }
+            photo.isAdded = YES;
+        }
+        num++;
+    }
+}
+
+#pragma mark - MapViewDelegate
+
+- (MKAnnotationView *)mapView:(MKMapView *)map viewForAnnotation:(id <MKAnnotation>)annotation
+{
+    MKAnnotationView *annotationView = (MKAnnotationView *)[map dequeueReusableAnnotationViewWithIdentifier:@"PABLAnnotation"];
+    
+    if (annotationView == nil) {
+        annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"PABLAnnotation"];
+    }
+    annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    annotationView.image = ((PABLPhoto *)[PhotoManager sharedInstance].photoArray[[((MKPointAnnotation *)annotation).title integerValue]]).image;
+    annotationView.annotation = annotation;
+    
+    [annotationView setEnabled:YES];
+    [annotationView setCanShowCallout:YES];
+    
+    CGRect viewFrame = annotationView.frame;
+    viewFrame.size.width = 50;
+    viewFrame.size.height = 50;
+    [annotationView setFrame:viewFrame];
+    return annotationView;
+}
 
 #pragma mark - Map Action
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
@@ -143,22 +158,7 @@
     leftCorner.x = mapView.region.center.latitude - mapView.region.span.latitudeDelta/2;
     leftCorner.y = mapView.region.center.longitude - mapView.region.span.longitudeDelta/2;
     
-//    if (self.photoArray) {
-//        for (PHAsset *photo in self.photoArray) {
-//            [self.imageManager requestImageDataForAsset:photo
-//                                                options:self.imageOptions
-//                                          resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
-//                                              if (imageData) {
-//                                                  CGImageSourceRef source = CGImageSourceCreateWithData((CFMutableDataRef)imageData, NULL);
-//                                                  if (source) {
-//                                                      NSDictionary *metadata = (NSDictionary *)CFBridgingRelease(CGImageSourceCopyPropertiesAtIndex(source,0,NULL));
-//                                                      if (metadata && metadata[@"{GPS}"] && metadata[@"{GPS}"][@"Latitude"] && metadata[@"{GPS}"][@"Longitude"]){
-//                                                      }
-//                                                  }
-//                                              }
-//                                          }];
-//        }
-//    }
+    [self refreshPhotoViewOnMapWithLeftCorner:leftCorner withSpan:mapView.region.span];
 }
 
 - (void)updateMapZoomLocation:(CLLocation *)newLocation withSpan:(MKCoordinateSpan)span {
@@ -317,6 +317,7 @@
     if (_mapView == nil) {
         _mapView = [[MKMapView alloc]init];
         [_mapView setDelegate:self];
+        [_mapView setRotateEnabled:NO];
     }
     return _mapView;
 }
@@ -335,23 +336,6 @@
         [_animationView setBackgroundColor:HEXCOLOR(0xFFFFFFFF)];
     }
     return _animationView;
-}
-
-- (PHCachingImageManager *)imageManager {
-    if (_imageManager == nil) {
-        self.imageManager = [[PHCachingImageManager alloc] init];
-    }
-    return _imageManager;
-}
-
-- (PHImageRequestOptions *)imageOptions {
-    if (_imageOptions == nil) {
-        _imageOptions = [[PHImageRequestOptions alloc] init];
-        [_imageOptions setSynchronous:YES];
-        [_imageOptions setVersion:PHImageRequestOptionsVersionCurrent];
-        [_imageOptions setResizeMode:PHImageRequestOptionsResizeModeNone];
-    }
-    return _imageOptions;
 }
 
 @end

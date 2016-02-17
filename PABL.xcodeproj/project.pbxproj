@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CD1942B81C6775E700A8342D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD1942B71C6775E700A8342D /* CoreLocation.framework */; };
+		CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7335231C7238880086A2C0 /* PhotoManager.m */; };
 		CD97E36F1C68F41D009EE492 /* PABLMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD97E36E1C68F41D009EE492 /* PABLMenuViewController.m */; };
 		CDB69BA21C6982DB006CCE8B /* Common.m in Sources */ = {isa = PBXBuildFile; fileRef = CDB69BA11C6982DB006CCE8B /* Common.m */; };
 		CDC2B1C61C708E3800CB5D6B /* PABLMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = CDC2B1C51C708E3800CB5D6B /* PABLMenuView.m */; };
@@ -19,6 +20,7 @@
 		CDD547101C66367D00BAFCD8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CDD5470E1C66367D00BAFCD8 /* LaunchScreen.storyboard */; };
 		CDD5471B1C66367D00BAFCD8 /* PABLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD5471A1C66367D00BAFCD8 /* PABLTests.m */; };
 		CDD547261C66367D00BAFCD8 /* PABLUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD547251C66367D00BAFCD8 /* PABLUITests.m */; };
+		CDFC15FB1C737FD900E505BD /* PABLPhoto.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFC15FA1C737FD900E505BD /* PABLPhoto.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,8 @@
 
 /* Begin PBXFileReference section */
 		CD1942B71C6775E700A8342D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		CD7335221C7238880086A2C0 /* PhotoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoManager.h; sourceTree = "<group>"; };
+		CD7335231C7238880086A2C0 /* PhotoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoManager.m; sourceTree = "<group>"; };
 		CD97E36D1C68F41D009EE492 /* PABLMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLMenuViewController.h; sourceTree = "<group>"; };
 		CD97E36E1C68F41D009EE492 /* PABLMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLMenuViewController.m; sourceTree = "<group>"; };
 		CDB69BA01C6982DB006CCE8B /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
@@ -62,6 +66,8 @@
 		CDD547211C66367D00BAFCD8 /* PABLUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PABLUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDD547251C66367D00BAFCD8 /* PABLUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PABLUITests.m; sourceTree = "<group>"; };
 		CDD547271C66367D00BAFCD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CDFC15F91C737FD900E505BD /* PABLPhoto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLPhoto.h; sourceTree = "<group>"; };
+		CDFC15FA1C737FD900E505BD /* PABLPhoto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLPhoto.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,12 +138,15 @@
 		CDD546FF1C66367D00BAFCD8 /* PABL */ = {
 			isa = PBXGroup;
 			children = (
+				CDFC15F81C737FA800E505BD /* Model */,
 				CD97E3701C68F44D009EE492 /* ViewController */,
 				CD1942B91C677EEC00A8342D /* View */,
 				CDD547031C66367D00BAFCD8 /* AppDelegate.h */,
 				CDD547041C66367D00BAFCD8 /* AppDelegate.m */,
 				CDD547061C66367D00BAFCD8 /* ViewController.h */,
 				CDD547071C66367D00BAFCD8 /* ViewController.m */,
+				CD7335221C7238880086A2C0 /* PhotoManager.h */,
+				CD7335231C7238880086A2C0 /* PhotoManager.m */,
 				CDB69BA01C6982DB006CCE8B /* Common.h */,
 				CDB69BA11C6982DB006CCE8B /* Common.m */,
 				CDD547091C66367D00BAFCD8 /* Main.storyboard */,
@@ -173,6 +182,15 @@
 				CDD547271C66367D00BAFCD8 /* Info.plist */,
 			);
 			path = PABLUITests;
+			sourceTree = "<group>";
+		};
+		CDFC15F81C737FA800E505BD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				CDFC15F91C737FD900E505BD /* PABLPhoto.h */,
+				CDFC15FA1C737FD900E505BD /* PABLPhoto.m */,
+			);
+			name = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -306,11 +324,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				CDC2B1C61C708E3800CB5D6B /* PABLMenuView.m in Sources */,
+				CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */,
 				CDB69BA21C6982DB006CCE8B /* Common.m in Sources */,
 				CDD547081C66367D00BAFCD8 /* ViewController.m in Sources */,
 				CDD547051C66367D00BAFCD8 /* AppDelegate.m in Sources */,
 				CD97E36F1C68F41D009EE492 /* PABLMenuViewController.m in Sources */,
 				CDD547021C66367D00BAFCD8 /* main.m in Sources */,
+				CDFC15FB1C737FD900E505BD /* PABLPhoto.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

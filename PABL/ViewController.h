@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
-#import <Photos/Photos.h>
+#import "PhotoManager.h"
 #import "Common.h"
 
 @interface ViewController : UIViewController
