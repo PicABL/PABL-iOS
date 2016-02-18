@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		CD1942B81C6775E700A8342D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD1942B71C6775E700A8342D /* CoreLocation.framework */; };
 		CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7335231C7238880086A2C0 /* PhotoManager.m */; };
+		CD7D6D3B1C76339A00013AF5 /* PABLThumbnailView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7D6D3A1C76339A00013AF5 /* PABLThumbnailView.m */; };
 		CD97E36F1C68F41D009EE492 /* PABLMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD97E36E1C68F41D009EE492 /* PABLMenuViewController.m */; };
 		CDB69BA21C6982DB006CCE8B /* Common.m in Sources */ = {isa = PBXBuildFile; fileRef = CDB69BA11C6982DB006CCE8B /* Common.m */; };
 		CDC2B1C61C708E3800CB5D6B /* PABLMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = CDC2B1C51C708E3800CB5D6B /* PABLMenuView.m */; };
@@ -44,6 +45,8 @@
 		CD1942B71C6775E700A8342D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		CD7335221C7238880086A2C0 /* PhotoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoManager.h; sourceTree = "<group>"; };
 		CD7335231C7238880086A2C0 /* PhotoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoManager.m; sourceTree = "<group>"; };
+		CD7D6D391C76339A00013AF5 /* PABLThumbnailView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLThumbnailView.h; sourceTree = "<group>"; };
+		CD7D6D3A1C76339A00013AF5 /* PABLThumbnailView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLThumbnailView.m; sourceTree = "<group>"; };
 		CD97E36D1C68F41D009EE492 /* PABLMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLMenuViewController.h; sourceTree = "<group>"; };
 		CD97E36E1C68F41D009EE492 /* PABLMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLMenuViewController.m; sourceTree = "<group>"; };
 		CDB69BA01C6982DB006CCE8B /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
@@ -101,6 +104,8 @@
 			children = (
 				CDC2B1C41C708E3800CB5D6B /* PABLMenuView.h */,
 				CDC2B1C51C708E3800CB5D6B /* PABLMenuView.m */,
+				CD7D6D391C76339A00013AF5 /* PABLThumbnailView.h */,
+				CD7D6D3A1C76339A00013AF5 /* PABLThumbnailView.m */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -324,6 +329,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CDC2B1C61C708E3800CB5D6B /* PABLMenuView.m in Sources */,
+				CD7D6D3B1C76339A00013AF5 /* PABLThumbnailView.m in Sources */,
 				CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */,
 				CDB69BA21C6982DB006CCE8B /* Common.m in Sources */,
 				CDD547081C66367D00BAFCD8 /* ViewController.m in Sources */,

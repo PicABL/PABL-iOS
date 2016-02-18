@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "PABLMenuViewController.h"
 #import "PABLPhoto.h"
+#import "PABLThumbnailView.h"
 
 #define MENU_BUTTON_SIZE 40.0f
 #define MENU_BUTTON_PADDING 20.0f
@@ -16,7 +17,7 @@
 #define ALERT_LABEL_WIDTH 200.0f
 #define ALERT_LABEL_HEIGHT 10.0f
 
-@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate>
+@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate, PABLThumbnailViewDelegate>
 
 @property (nonatomic, strong) UIView *welcomeView;
 
@@ -27,6 +28,9 @@
 @property (nonatomic, strong) UIView *animationView;
 @property (nonatomic, strong) MKMapView *mapView;
 @property (nonatomic, strong) PABLMenuViewController *menuView;
+
+@property (nonatomic, strong) UIView *dimmView;
+@property (nonatomic, strong) UIImageView *detailView;
 
 @property (nonatomic, assign) BOOL isMine;
 
@@ -103,54 +107,97 @@
 
 #pragma mark - Methods
 
-- (CGPoint)getCenterPositionWithLocation:(CGPoint)location {
-    CGPoint result = CGPointZero;
-    
-    return result;
-}
-
 - (void)refreshPhotoViewOnMapWithLeftCorner:(CGPoint)leftCorner withSpan:(MKCoordinateSpan)span {
+    if (self.mapView.annotations.count > 20) {
+        return;
+    }
     NSInteger num = 0;
     for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
         if (photo.isAdded == NO) {
-            CGFloat latitude = [photo.metaData[@"{GPS}"][@"Latitude"] floatValue];
-            CGFloat longitude = [photo.metaData[@"{GPS}"][@"Longitude"] floatValue];
+            CGFloat latitude = photo.photoData.location.coordinate.latitude;
+            CGFloat longitude = photo.photoData.location.coordinate.longitude;
             if (leftCorner.x <= latitude && leftCorner.y <= longitude &&
                 leftCorner.x + span.latitudeDelta >= latitude && leftCorner.y + span.longitudeDelta >= longitude) {
                 MKPointAnnotation *annotation = [[MKPointAnnotation alloc]init];
                 CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
                 [annotation setCoordinate:coordinate];
                 annotation.title = [NSString stringWithFormat:@"%ld",num];
+                //여기에 MKPointAnnotation 을 wrapping 하는걸 또 만들어서 정보를 좀 더 줘야겠음
                 [self.mapView addAnnotation:annotation];
             }
             photo.isAdded = YES;
+            if (self.mapView.annotations.count > 20) {
+                break;
+            }
         }
         num++;
     }
+}
+
+#pragma mark - PABLThumbnailViewDelegate
+- (void)didTappedDetailView {
+    [UIView animateWithDuration:0.5f animations:^{
+        [self.dimmView setAlpha:0.0f];
+        [self.detailView setAlpha:0.0f];
+    } completion:^(BOOL finished) {
+        [self.dimmView removeFromSuperview];
+        [self.detailView removeFromSuperview];
+    }];
+}
+
+- (void)didTappedPABLThumbnailView:(MKAnnotationView *)pablThumbnailView {
+    
+    [self.dimmView setFrame:self.mapView.frame];
+    [self.dimmView setAlpha:0.0f];
+    [self.mapView addSubview:self.dimmView];
+    
+    [self.detailView setFrame:CGRectMake(40, 40, CGRectGetWidth(self.mapView.frame) - 80, CGRectGetHeight(self.mapView.frame) - 80)];
+    [self.detailView setAlpha:0.0f];
+    [self.mapView addSubview:self.detailView];
+    PABLThumbnailView *thumbnailView = (PABLThumbnailView *)pablThumbnailView;
+    [thumbnailView.photo getImageWithSize:self.detailView.frame.size WithCompletion:^(UIImage *image) {
+        self.detailView.image = image;
+        CGSize imageSize = image.size;
+        if (imageSize.width >= self.mapView.frame.size.width) {
+            imageSize.width = self.mapView.frame.size.width - 100;
+        }
+        if (imageSize.height >= self.mapView.frame.size.height) {
+            imageSize.height = self.mapView.frame.size.height - 100;
+        }
+        [self.detailView setFrame:CGRectMake(0, 0, image.size.width, image.size.height)];
+        self.detailView.center = self.mapView.center;
+    }];
+    [UIView animateWithDuration:0.5f animations:^{
+        [self.dimmView setAlpha:0.7f];
+        [self.detailView setAlpha:1.0f];
+    }];
 }
 
 #pragma mark - MapViewDelegate
 
 - (MKAnnotationView *)mapView:(MKMapView *)map viewForAnnotation:(id <MKAnnotation>)annotation
 {
-    MKAnnotationView *annotationView = (MKAnnotationView *)[map dequeueReusableAnnotationViewWithIdentifier:@"PABLAnnotation"];
+    PABLThumbnailView *annotationView = (PABLThumbnailView *)[map dequeueReusableAnnotationViewWithIdentifier:@"PABLAnnotation"];
     
     if (annotationView == nil) {
-        annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"PABLAnnotation"];
+        annotationView = [[PABLThumbnailView alloc] initWithAnnotation:annotation reuseIdentifier:@"PABLAnnotation"];
     }
-    annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-    annotationView.image = ((PABLPhoto *)[PhotoManager sharedInstance].photoArray[[((MKPointAnnotation *)annotation).title integerValue]]).image;
-    annotationView.annotation = annotation;
-    
+    [annotationView setDelegate:self];
+    [annotationView setPhoto:(PABLPhoto *)[PhotoManager sharedInstance].photoArray[[((MKPointAnnotation *)annotation).title integerValue]]];
+    [annotationView setAnnotation:annotation];
+    [annotationView setRightCalloutAccessoryView:[UIButton buttonWithType:UIButtonTypeDetailDisclosure]];
     [annotationView setEnabled:YES];
     [annotationView setCanShowCallout:YES];
     
     CGRect viewFrame = annotationView.frame;
-    viewFrame.size.width = 50;
-    viewFrame.size.height = 50;
+    viewFrame.size.width = TUMBNAIL_SIZE.width;
+    viewFrame.size.height = TUMBNAIL_SIZE.height;
     [annotationView setFrame:viewFrame];
+    [annotationView setContentMode:UIViewContentModeScaleAspectFit];
+    
     return annotationView;
 }
+
 
 #pragma mark - Map Action
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
@@ -338,4 +385,23 @@
     return _animationView;
 }
 
+- (UIView *)dimmView {
+    if (_dimmView == nil) {
+        _dimmView = [[UIView alloc]init];
+        [_dimmView setBackgroundColor:[UIColor blackColor]];
+    }
+    return _dimmView;
+}
+
+- (UIImageView *)detailView {
+    if (_detailView == nil) {
+        _detailView = [[UIImageView alloc]init];
+        [_detailView setBackgroundColor:[UIColor blackColor]];
+        [_detailView setContentMode:UIViewContentModeScaleAspectFit];
+        [_detailView setUserInteractionEnabled:YES];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didTappedDetailView)];
+        [_detailView addGestureRecognizer:tapGesture];
+    }
+    return _detailView;
+}
 @end

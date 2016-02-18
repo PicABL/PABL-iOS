@@ -10,13 +10,15 @@
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 
+#define TUMBNAIL_SIZE CGSizeMake(50, 50)
+
 @interface PABLPhoto : NSObject
 
-@property (nonatomic, strong) NSData *imageData;
-@property (nonatomic, strong) UIImage *image;
-@property (nonatomic, strong) NSDictionary *metaData;
+@property (nonatomic, strong) PHAsset *photoData;
 @property (nonatomic, assign) BOOL isAdded;
 
-- (instancetype)initWithData:(NSData *)data;
+- (instancetype)initWithPHAsset:(PHAsset *)data;
 
+- (void)getThumbnailImageWithCompletion:(void(^)(UIImage *image))completion;
+- (void)getImageWithSize:(CGSize)imageSize WithCompletion:(void(^)(UIImage *image))completion;
 @end

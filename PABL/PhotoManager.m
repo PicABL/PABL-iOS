@@ -11,13 +11,6 @@
 
 static PhotoManager *instance = nil;
 
-@interface PhotoManager ()
-
-@property (nonatomic, strong) PHCachingImageManager *imageManager;
-@property (nonatomic, strong) PHImageRequestOptions *imageOptions;
-
-@end
-
 @implementation PhotoManager
 
 + (PhotoManager *)sharedInstance {
@@ -45,36 +38,24 @@ static PhotoManager *instance = nil;
         [albumArray addObject:assetCollection];
     }];
     
-    NSMutableArray *assetArray = [[NSMutableArray alloc]init];
     for (PHAssetCollection *album in albumArray) {
         @try {
             PHFetchOptions *option = [PHFetchOptions new];
+            //여기서 로케이션 정보만 가져오는 방법을 고려
+            //쿼리느낌으로
             [option setPredicate:[NSPredicate predicateWithFormat:@"mediaType == %d or mediaType == %d", PHAssetMediaTypeImage, PHAssetMediaTypeVideo]];
             PHFetchResult *assetsFetchResults = [PHAsset fetchAssetsInAssetCollection:album options:option];
             PHContentEditingInputRequestOptions *options = [[PHContentEditingInputRequestOptions alloc] init];
             options.networkAccessAllowed = YES;
             for (PHAsset *photo in assetsFetchResults) {
-                [assetArray addObject:photo];
+                PABLPhoto *pablPhoto = [[PABLPhoto alloc]initWithPHAsset:photo];
+                [self.photoArray addObject:pablPhoto];
             }
         }
         @catch (NSException *exception) {
             NSLog(@"exception : %@",exception);
         }
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        for (PHAsset *photo in assetArray) {
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self.imageManager requestImageDataForAsset:photo
-                                                    options:self.imageOptions
-                                              resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
-                                                  if (imageData != nil && self.photoArray.count < 10) {
-                                                      PABLPhoto *pablPhoto = [[PABLPhoto alloc]initWithData:imageData];
-                                                      [self.photoArray addObject:pablPhoto];
-                                                  }
-                                              }];
-            });
-        }
-    });
 }
 
 - (NSMutableArray *)photoArray {
@@ -83,22 +64,4 @@ static PhotoManager *instance = nil;
     }
     return _photoArray;
 }
-
-- (PHCachingImageManager *)imageManager {
-    if (_imageManager == nil) {
-        self.imageManager = [[PHCachingImageManager alloc] init];
-    }
-    return _imageManager;
-}
-
-- (PHImageRequestOptions *)imageOptions {
-    if (_imageOptions == nil) {
-        _imageOptions = [[PHImageRequestOptions alloc] init];
-        [_imageOptions setSynchronous:YES];
-        [_imageOptions setVersion:PHImageRequestOptionsVersionCurrent];
-        [_imageOptions setResizeMode:PHImageRequestOptionsResizeModeNone];
-    }
-    return _imageOptions;
-}
-
 @end
