@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "PABLMenuViewController.h"
 #import "PABLPhoto.h"
+#import "PABLPointAnnotation.h"
 #import "PABLThumbnailView.h"
 
 #define MENU_BUTTON_SIZE 40.0f
@@ -94,6 +95,7 @@
     [UIView animateWithDuration:0.5f animations:^{
         [self.welcomeView setAlpha:0.0f];
     } completion:^(BOOL finished) {
+        [self.welcomeView setHidden:YES];
         CGPoint leftCorner = CGPointZero;
         leftCorner.x = self.mapView.region.center.latitude - self.mapView.region.span.latitudeDelta/2;
         leftCorner.y = self.mapView.region.center.longitude - self.mapView.region.span.longitudeDelta/2;
@@ -107,7 +109,27 @@
 
 #pragma mark - Methods
 
+- (CGFloat)viewLengthToCoordinateLength:(CGFloat)length {
+    CGFloat result = 0;
+    
+    return result;
+}
+
 - (void)refreshPhotoViewOnMapWithLeftCorner:(CGPoint)leftCorner withSpan:(MKCoordinateSpan)span {
+    if (self.welcomeView.hidden == NO) {
+        return;
+    }
+    NSMutableArray *removeAnnotations = [[NSMutableArray alloc]init];
+    for (PABLPointAnnotation *pablPointAnnotation in self.mapView.annotations) {
+        CGFloat latitude = pablPointAnnotation.coordinate.latitude;
+        CGFloat longitude = pablPointAnnotation.coordinate.longitude;
+        if (leftCorner.x + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] > latitude || leftCorner.y + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] > longitude ||
+            leftCorner.x + span.latitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] < latitude || leftCorner.y + span.longitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] < longitude) {
+            [removeAnnotations addObject:pablPointAnnotation];
+            ((PABLPhoto *)[PhotoManager sharedInstance].photoArray[pablPointAnnotation.index]).isAdded = NO;
+        }
+    }
+    [self.mapView removeAnnotations:removeAnnotations];
     if (self.mapView.annotations.count > 20) {
         return;
     }
@@ -116,16 +138,15 @@
         if (photo.isAdded == NO) {
             CGFloat latitude = photo.photoData.location.coordinate.latitude;
             CGFloat longitude = photo.photoData.location.coordinate.longitude;
-            if (leftCorner.x <= latitude && leftCorner.y <= longitude &&
-                leftCorner.x + span.latitudeDelta >= latitude && leftCorner.y + span.longitudeDelta >= longitude) {
-                MKPointAnnotation *annotation = [[MKPointAnnotation alloc]init];
+            if (leftCorner.x + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] <= latitude && leftCorner.y  + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] <= longitude &&
+                leftCorner.x + span.latitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] >= latitude && leftCorner.y + span.longitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] >= longitude) {
+                PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
                 CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
                 [annotation setCoordinate:coordinate];
-                annotation.title = [NSString stringWithFormat:@"%ld",num];
-                //여기에 MKPointAnnotation 을 wrapping 하는걸 또 만들어서 정보를 좀 더 줘야겠음
+                annotation.index = num;
+                photo.isAdded = YES;
                 [self.mapView addAnnotation:annotation];
             }
-            photo.isAdded = YES;
             if (self.mapView.annotations.count > 20) {
                 break;
             }
@@ -136,7 +157,7 @@
 
 #pragma mark - PABLThumbnailViewDelegate
 - (void)didTappedDetailView {
-    [UIView animateWithDuration:0.5f animations:^{
+    [UIView animateWithDuration:0.3f animations:^{
         [self.dimmView setAlpha:0.0f];
         [self.detailView setAlpha:0.0f];
     } completion:^(BOOL finished) {
@@ -167,8 +188,8 @@
         [self.detailView setFrame:CGRectMake(0, 0, image.size.width, image.size.height)];
         self.detailView.center = self.mapView.center;
     }];
-    [UIView animateWithDuration:0.5f animations:^{
-        [self.dimmView setAlpha:0.7f];
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.dimmView setAlpha:0.85f];
         [self.detailView setAlpha:1.0f];
     }];
 }
@@ -183,7 +204,7 @@
         annotationView = [[PABLThumbnailView alloc] initWithAnnotation:annotation reuseIdentifier:@"PABLAnnotation"];
     }
     [annotationView setDelegate:self];
-    [annotationView setPhoto:(PABLPhoto *)[PhotoManager sharedInstance].photoArray[[((MKPointAnnotation *)annotation).title integerValue]]];
+    [annotationView setPhoto:(PABLPhoto *)[PhotoManager sharedInstance].photoArray[((PABLPointAnnotation *)annotation).index]];
     [annotationView setAnnotation:annotation];
     [annotationView setRightCalloutAccessoryView:[UIButton buttonWithType:UIButtonTypeDetailDisclosure]];
     [annotationView setEnabled:YES];

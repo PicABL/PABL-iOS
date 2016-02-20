@@ -20,6 +20,7 @@
 
 @property (nonatomic, assign) id<PABLThumbnailViewDelegate> delegate;
 
+@property (nonatomic, assign) NSInteger index;
 @property (nonatomic, strong) PABLPhoto *photo;
 
 @end

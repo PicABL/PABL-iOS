@@ -10,6 +10,14 @@
 
 @implementation PABLThumbnailView
 
+
+- (instancetype)initWithAnnotation:(id<MKAnnotation>)annotation reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithAnnotation:annotation reuseIdentifier:reuseIdentifier]) {
+        
+    }
+    return self;
+}
+
 - (void)setPhoto:(PABLPhoto *)photo {
     _photo = photo;
     [self setAlpha:0.0f];
@@ -21,10 +29,9 @@
     }];
 }
 
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     if (self.delegate && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailView:)]) {
         [self.delegate didTappedPABLThumbnailView:self];
     }
 }
-
 @end
