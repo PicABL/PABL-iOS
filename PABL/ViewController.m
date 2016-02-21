@@ -109,46 +109,64 @@
 
 #pragma mark - Methods
 
-- (CGFloat)viewLengthToCoordinateLength:(CGFloat)length {
-    CGFloat result = 0;
-    
-    return result;
+- (CGFloat)viewWidthLengthToCoordinateLength:(CGFloat)length {
+    return length/CGRectGetWidth(self.mapView.frame) * self.mapView.region.span.latitudeDelta;
+}
+- (CGFloat)viewHeightLengthToCoordinateLength:(CGFloat)length {
+    return length/CGRectGetHeight(self.mapView.frame) * self.mapView.region.span.longitudeDelta;
+}
+- (CGFloat)coordinateWidthLengthToviewLength:(CGFloat)length{
+    return length/self.mapView.region.span.latitudeDelta * CGRectGetWidth(self.mapView.frame);
+}
+- (CGFloat)coordinateHeightLengthToviewLength:(CGFloat)length{
+    return length/self.mapView.region.span.longitudeDelta * CGRectGetHeight(self.mapView.frame);
 }
 
 - (void)refreshPhotoViewOnMapWithLeftCorner:(CGPoint)leftCorner withSpan:(MKCoordinateSpan)span {
     if (self.welcomeView.hidden == NO) {
         return;
     }
-    NSMutableArray *removeAnnotations = [[NSMutableArray alloc]init];
-    for (PABLPointAnnotation *pablPointAnnotation in self.mapView.annotations) {
-        CGFloat latitude = pablPointAnnotation.coordinate.latitude;
-        CGFloat longitude = pablPointAnnotation.coordinate.longitude;
-        if (leftCorner.x + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] > latitude || leftCorner.y + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] > longitude ||
-            leftCorner.x + span.latitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] < latitude || leftCorner.y + span.longitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] < longitude) {
-            [removeAnnotations addObject:pablPointAnnotation];
-            ((PABLPhoto *)[PhotoManager sharedInstance].photoArray[pablPointAnnotation.index]).isAdded = NO;
-        }
-    }
-    [self.mapView removeAnnotations:removeAnnotations];
-    if (self.mapView.annotations.count > 20) {
-        return;
-    }
+    CGFloat latitudePaddingSize = [self viewWidthLengthToCoordinateLength:TUMBNAIL_SIZE.width]/2;
+    CGFloat longitudePaddingSize = [self viewHeightLengthToCoordinateLength:TUMBNAIL_SIZE.height]/2;
+//    NSMutableArray *removeAnnotations = [[NSMutableArray alloc]init];
+//    for (PABLPointAnnotation *pablPointAnnotation in self.mapView.annotations) {
+//        CGFloat latitude = pablPointAnnotation.coordinate.latitude;
+//        CGFloat longitude = pablPointAnnotation.coordinate.longitude;
+//        if (leftCorner.x + latitudePaddingSize > latitude || leftCorner.y + longitudePaddingSize > longitude ||
+//            leftCorner.x + span.latitudeDelta - latitudePaddingSize < latitude || leftCorner.y + span.longitudeDelta - longitudePaddingSize < longitude) {
+//            [removeAnnotations addObject:pablPointAnnotation];
+//            ((PABLPhoto *)[PhotoManager sharedInstance].photoArray[pablPointAnnotation.index]).isAdded = NO;
+//        }
+//    }
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    
     NSInteger num = 0;
     for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
         if (photo.isAdded == NO) {
             CGFloat latitude = photo.photoData.location.coordinate.latitude;
             CGFloat longitude = photo.photoData.location.coordinate.longitude;
-            if (leftCorner.x + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] <= latitude && leftCorner.y  + [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] <= longitude &&
-                leftCorner.x + span.latitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.width] >= latitude && leftCorner.y + span.longitudeDelta - [self viewLengthToCoordinateLength:TUMBNAIL_SIZE.height] >= longitude) {
-                PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
+            if (leftCorner.x + latitudePaddingSize <= latitude && leftCorner.y  + longitudePaddingSize <= longitude &&
+                leftCorner.x + span.latitudeDelta - latitudePaddingSize >= latitude && leftCorner.y + span.longitudeDelta - longitudePaddingSize >= longitude) {
                 CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
-                [annotation setCoordinate:coordinate];
-                annotation.index = num;
-                photo.isAdded = YES;
-                [self.mapView addAnnotation:annotation];
-            }
-            if (self.mapView.annotations.count > 20) {
-                break;
+                BOOL canAdd = YES;
+                for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
+                    CGFloat addedLatitude = addedAnnotation.coordinate.latitude;
+                    CGFloat addedLongitude = addedAnnotation.coordinate.longitude;
+                    if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
+                        + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
+                        < TUMBNAIL_SIZE.width * TUMBNAIL_SIZE.width + TUMBNAIL_SIZE.height * TUMBNAIL_SIZE.height) {
+                        canAdd = NO;
+                        addedAnnotation.pileNum++;
+                    }
+                }
+                if (canAdd == YES) {
+                    PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
+                    [annotation setCoordinate:coordinate];
+                    annotation.index = num;
+                    annotation.pileNum = 1;
+                    [self.mapView addAnnotation:annotation];
+                    photo.isAdded = YES;
+                }
             }
         }
         num++;
@@ -205,6 +223,7 @@
     }
     [annotationView setDelegate:self];
     [annotationView setPhoto:(PABLPhoto *)[PhotoManager sharedInstance].photoArray[((PABLPointAnnotation *)annotation).index]];
+    [annotationView setPileNum:((PABLPointAnnotation *)annotation).pileNum];
     [annotationView setAnnotation:annotation];
     [annotationView setRightCalloutAccessoryView:[UIButton buttonWithType:UIButtonTypeDetailDisclosure]];
     [annotationView setEnabled:YES];
@@ -215,6 +234,7 @@
     viewFrame.size.height = TUMBNAIL_SIZE.height;
     [annotationView setFrame:viewFrame];
     [annotationView setContentMode:UIViewContentModeScaleAspectFit];
+    [annotationView setCanShowCallout:NO];
     
     return annotationView;
 }

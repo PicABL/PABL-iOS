@@ -7,6 +7,7 @@
 //
 
 #import "PABLPhoto.h"
+#import "PABLThumbnailView.h"
 
 @interface PABLPhoto ()
 

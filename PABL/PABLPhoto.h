@@ -10,8 +10,6 @@
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 
-#define TUMBNAIL_SIZE CGSizeMake(50, 50)
-
 @interface PABLPhoto : NSObject
 
 @property (nonatomic, strong) PHAsset *photoData;

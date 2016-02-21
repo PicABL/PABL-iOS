@@ -11,5 +11,6 @@
 @interface PABLPointAnnotation : MKPointAnnotation
 
 @property (nonatomic, assign) NSInteger index;
+@property (nonatomic, assign) NSInteger pileNum;
 
 @end
