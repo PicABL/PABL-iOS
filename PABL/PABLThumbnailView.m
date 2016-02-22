@@ -58,6 +58,11 @@
     CGRect badgeLabelFrame = CGRectMake(0, 0, textSize.size.width, textSize.size.height);
     [self.numBadge setFrame:badgeLabelFrame];
     self.numBadge.center = CGPointMake(badgeViewFrame.size.width/2, badgeViewFrame.size.height/2);
+    if (self.pileNum < 2) {
+        [self.badgeView setHidden:YES];
+    } else {
+        [self.badgeView setHidden:NO];
+    }
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
