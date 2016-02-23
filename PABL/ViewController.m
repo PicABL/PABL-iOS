@@ -128,44 +128,23 @@
     }
     CGFloat latitudePaddingSize = [self viewWidthLengthToCoordinateLength:TUMBNAIL_SIZE.width]/2;
     CGFloat longitudePaddingSize = [self viewHeightLengthToCoordinateLength:TUMBNAIL_SIZE.height]/2;
-    
-    //이미 추가되있는 사진들중 제거할 거 제거
-    NSMutableArray *removeAnnotations = [[NSMutableArray alloc]init];
+
     for (PABLPointAnnotation *pablPointAnnotation in self.mapView.annotations) {
         PABLPhoto *photo = [PhotoManager sharedInstance].photoArray[pablPointAnnotation.index];
-        CGFloat latitude = pablPointAnnotation.coordinate.latitude;
-        CGFloat longitude = pablPointAnnotation.coordinate.longitude;
         pablPointAnnotation.pileNum = 1;
-        if (leftCorner.x + latitudePaddingSize > latitude || leftCorner.y + longitudePaddingSize > longitude ||
-            leftCorner.x + span.latitudeDelta - latitudePaddingSize < latitude || leftCorner.y + span.longitudeDelta - longitudePaddingSize < longitude) {
-            [removeAnnotations addObject:pablPointAnnotation];
-            photo.isAdded = NO;
-        } else {
-            for (PABLPointAnnotation *remainPointAnnotation in self.mapView.annotations) {
-                if (pablPointAnnotation.index == remainPointAnnotation.index) {
-                    break;
-                }
-                PABLPhoto *remainPhoto = [PhotoManager sharedInstance].photoArray[remainPointAnnotation.index];
-                if (remainPhoto.isAdded == YES) {
-                    CGFloat addedLatitude = remainPointAnnotation.coordinate.latitude;
-                    CGFloat addedLongitude = remainPointAnnotation.coordinate.longitude;
-                    if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
-                        + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
-                        < TUMBNAIL_SIZE.width * TUMBNAIL_SIZE.width + TUMBNAIL_SIZE.height * TUMBNAIL_SIZE.height) {
-                        [removeAnnotations addObject:remainPointAnnotation];
-                        remainPhoto.isAdded = NO;
-                    }
-                }
-            }
-        }
+        photo.isAdded = NO;
     }
-    [self.mapView removeAnnotations:removeAnnotations];
+    [self.mapView removeAnnotations:self.mapView.annotations];
     
     NSInteger num = 0;
     for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
         if (photo.isAdded == NO) {
             CGFloat latitude = photo.photoData.location.coordinate.latitude;
             CGFloat longitude = photo.photoData.location.coordinate.longitude;
+            if (latitude == 0 && longitude == 0) {
+                num++;
+                continue;
+            }
             if (leftCorner.x + latitudePaddingSize <= latitude && leftCorner.y  + longitudePaddingSize <= longitude &&
                 leftCorner.x + span.latitudeDelta - latitudePaddingSize >= latitude && leftCorner.y + span.longitudeDelta - longitudePaddingSize >= longitude) {
                 CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
@@ -175,7 +154,7 @@
                     CGFloat addedLongitude = addedAnnotation.coordinate.longitude;
                     if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
                         + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
-                        < TUMBNAIL_SIZE.width * TUMBNAIL_SIZE.width + TUMBNAIL_SIZE.height * TUMBNAIL_SIZE.height) {
+                        < (TUMBNAIL_SIZE.width + 5) * (TUMBNAIL_SIZE.width + 5) + (TUMBNAIL_SIZE.height + 5) * (TUMBNAIL_SIZE.height + 5)) {
                         canAdd = NO;
                         addedAnnotation.pileNum++;
                         photo.isAdded = NO;

@@ -34,12 +34,8 @@
 
 - (void)setPhoto:(PABLPhoto *)photo {
     _photo = photo;
-    [self setAlpha:0.0f];
     [photo getThumbnailImageWithCompletion:^(UIImage *image) {
         self.image = image;
-        [UIView animateWithDuration:0.5f animations:^{
-            [self setAlpha:1.0f];
-        }];
     }];
 }
 
