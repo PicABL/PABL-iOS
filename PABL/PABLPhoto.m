@@ -22,6 +22,7 @@
     if (self = [super init]) {
         self.photoData = data;
         self.isAdded = NO;
+        self.pileParents = -1;
     }
     return self;
 }

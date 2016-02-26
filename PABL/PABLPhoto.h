@@ -12,6 +12,7 @@
 
 @interface PABLPhoto : NSObject
 
+@property (nonatomic, assign) NSInteger pileParents;
 @property (nonatomic, strong) PHAsset *photoData;
 @property (nonatomic, assign) BOOL isAdded;
 

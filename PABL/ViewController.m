@@ -152,7 +152,7 @@
                     CGFloat addedLongitude = remainPointAnnotation.coordinate.longitude;
                     if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
                         + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
-                        < (TUMBNAIL_SIZE.width * 2) * (TUMBNAIL_SIZE.width * 2) + (TUMBNAIL_SIZE.height * 2) * (TUMBNAIL_SIZE.height * 2)) {
+                        < (TUMBNAIL_SIZE.width) * (TUMBNAIL_SIZE.width) + (TUMBNAIL_SIZE.height) * (TUMBNAIL_SIZE.height)) {
                         [removeAnnotations addObject:remainPointAnnotation];
                         remainPhoto.isAdded = NO;
                     }
@@ -160,7 +160,16 @@
             }
         }
     }
+    for (PABLPointAnnotation *removeAnnotation in removeAnnotations) {
+        for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
+            if (photo.pileParents == removeAnnotation.index) {
+                photo.pileParents = -1;
+            }
+        }
+    }
     [self.mapView removeAnnotations:removeAnnotations];
+    
+    
     
     NSInteger num = 0;
     for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
@@ -171,30 +180,42 @@
                 num++;
                 continue;
             }
-            if (leftCorner.x + latitudePaddingSize <= latitude && leftCorner.y  + longitudePaddingSize <= longitude &&
-                leftCorner.x + span.latitudeDelta - latitudePaddingSize >= latitude && leftCorner.y + span.longitudeDelta - longitudePaddingSize >= longitude) {
-                CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
-                BOOL canAdd = YES;
-                for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
-                    CGFloat addedLatitude = addedAnnotation.coordinate.latitude;
-                    CGFloat addedLongitude = addedAnnotation.coordinate.longitude;
-                    if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
-                        + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
-                        < (TUMBNAIL_SIZE.width * 2) * (TUMBNAIL_SIZE.width * 2) + (TUMBNAIL_SIZE.height * 2) * (TUMBNAIL_SIZE.height * 2)) {
-                        canAdd = NO;
-                        addedAnnotation.pileNum++;
-                        photo.isAdded = NO;
-                        break;
+            BOOL canAdd = YES;
+            CGFloat minLength = CGFLOAT_MAX;
+            PABLPointAnnotation *pileParentsAnnotation = nil;
+            
+            for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
+                CGFloat addedLatitude = addedAnnotation.coordinate.latitude;
+                CGFloat addedLongitude = addedAnnotation.coordinate.longitude;
+                if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
+                    + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
+                    < (TUMBNAIL_SIZE.width) * (TUMBNAIL_SIZE.width) + (TUMBNAIL_SIZE.height) * (TUMBNAIL_SIZE.height)) {
+                    if (minLength > [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
+                        + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]) {
+                        minLength = [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
+                        + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)];
+                        pileParentsAnnotation = addedAnnotation;
                     }
                 }
-                if (canAdd == YES && photo.isAdded == NO) {
-                    PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
-                    [annotation setCoordinate:coordinate];
-                    annotation.index = num;
-                    annotation.pileNum = 1;
-                    [self.mapView addAnnotation:annotation];
-                    photo.isAdded = YES;
-                }
+            }
+            if (pileParentsAnnotation != nil) {
+                pileParentsAnnotation.pileNum++;
+                photo.isAdded = NO;
+                photo.pileParents = pileParentsAnnotation.index;
+                canAdd = NO;
+            }
+            
+            if (canAdd == YES &&
+                leftCorner.x + latitudePaddingSize <= latitude && leftCorner.y  + longitudePaddingSize <= longitude &&
+                leftCorner.x + span.latitudeDelta - latitudePaddingSize >= latitude && leftCorner.y + span.longitudeDelta - longitudePaddingSize >= longitude) {
+                CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
+                PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
+                [annotation setCoordinate:coordinate];
+                annotation.index = num;
+                annotation.pileNum = 1;
+                [self.mapView addAnnotation:annotation];
+                photo.isAdded = YES;
+                photo.pileParents = -1;
             }
         }
         num++;
