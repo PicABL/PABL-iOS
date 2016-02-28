@@ -130,8 +130,6 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         CGFloat latitudePaddingSize = [self viewWidthLengthToCoordinateLength:TUMBNAIL_SIZE.width]/2;
         CGFloat longitudePaddingSize = [self viewHeightLengthToCoordinateLength:TUMBNAIL_SIZE.height]/2;
-        
-        
         NSMutableArray *removeAnnotations = [[NSMutableArray alloc]init];
         
         for (PABLPointAnnotation *pablPointAnnotation in self.mapView.annotations) {
@@ -238,8 +236,10 @@
     }];
 }
 
+- (void)didTappedPABLThumbnailViewWithManyPiles:(MKAnnotationView *)pablThumbnailView {
+}
+
 - (void)didTappedPABLThumbnailView:(MKAnnotationView *)pablThumbnailView {
-    
     [self.dimmView setFrame:self.mapView.frame];
     [self.dimmView setAlpha:0.0f];
     [self.mapView addSubview:self.dimmView];
@@ -292,7 +292,6 @@
     
     return annotationView;
 }
-
 
 #pragma mark - Map Action
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {

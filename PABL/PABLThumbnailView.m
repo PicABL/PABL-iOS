@@ -61,11 +61,19 @@
     }
 }
 
+#pragma mark - touch action
+
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailView:)]) {
-        [self.delegate didTappedPABLThumbnailView:self];
+    if (self.delegate) {
+        if (self.pileNum > 1 && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailViewWithManyPiles:)]) {
+            [self.delegate didTappedPABLThumbnailViewWithManyPiles:self];
+        } else if ([self.delegate respondsToSelector:@selector(didTappedPABLThumbnailView:)]) {
+            [self.delegate didTappedPABLThumbnailView:self];
+        }
     }
 }
+
+#pragma mark - generators
 
 - (UIView *)badgeView {
     if (_badgeView == nil) {

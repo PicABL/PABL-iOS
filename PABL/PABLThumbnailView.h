@@ -14,6 +14,7 @@
 
 @protocol PABLThumbnailViewDelegate <NSObject>
 
+- (void)didTappedPABLThumbnailViewWithManyPiles:(MKAnnotationView *)pablThumbnailView;
 - (void)didTappedPABLThumbnailView:(MKAnnotationView *)pablThumbnailView;
 
 @end
