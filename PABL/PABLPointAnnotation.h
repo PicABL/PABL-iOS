@@ -8,9 +8,17 @@
 
 #import <MapKit/MapKit.h>
 
+typedef enum ActionType{
+    AnnotationActionTypeAppear,
+    AnnotationActionTypeDisappear
+} ActionType;
+
 @interface PABLPointAnnotation : MKPointAnnotation
 
 @property (nonatomic, assign) NSInteger index;
 @property (nonatomic, assign) NSInteger pileNum;
+@property (nonatomic, assign) CLLocationCoordinate2D departure;
+@property (nonatomic, assign) CLLocationCoordinate2D arrival;
+@property (nonatomic, assign) ActionType actionType;
 
 @end
