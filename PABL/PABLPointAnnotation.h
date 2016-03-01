@@ -10,7 +10,8 @@
 
 typedef enum ActionType{
     AnnotationActionTypeAppear,
-    AnnotationActionTypeDisappear
+    AnnotationActionTypeDisappear,
+    AnnotationActionTypeTemp
 } ActionType;
 
 @interface PABLPointAnnotation : MKPointAnnotation

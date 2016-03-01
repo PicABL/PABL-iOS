@@ -17,7 +17,7 @@
 #define TITLE_VIEW_HEIGHT 60.0f
 #define ALERT_LABEL_WIDTH 200.0f
 #define ALERT_LABEL_HEIGHT 10.0f
-#define PILE_LENGTH 100.0f
+#define PILE_LENGTH 70.0f
 
 @interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate, PABLThumbnailViewDelegate>
 
@@ -98,8 +98,8 @@
     } completion:^(BOOL finished) {
         [self.welcomeView setHidden:YES];
         CGPoint leftCorner = CGPointZero;
-        leftCorner.x = self.mapView.region.center.latitude - self.mapView.region.span.latitudeDelta/2;
-        leftCorner.y = self.mapView.region.center.longitude - self.mapView.region.span.longitudeDelta/2;
+        leftCorner.x = self.mapView.region.center.longitude - self.mapView.region.span.longitudeDelta/2;
+        leftCorner.y = self.mapView.region.center.latitude - self.mapView.region.span.latitudeDelta/2;
         [self refreshPhotoViewOnMapWithLeftCorner:leftCorner withSpan:self.mapView.region.span];
     }];
 }
@@ -111,16 +111,16 @@
 #pragma mark - Methods
 
 - (CGFloat)viewWidthLengthToCoordinateLength:(CGFloat)length {
-    return length/CGRectGetWidth(self.mapView.frame) * self.mapView.region.span.latitudeDelta;
+    return length/CGRectGetWidth(self.mapView.frame) * self.mapView.region.span.longitudeDelta;
 }
 - (CGFloat)viewHeightLengthToCoordinateLength:(CGFloat)length {
-    return length/CGRectGetHeight(self.mapView.frame) * self.mapView.region.span.longitudeDelta;
+    return length/CGRectGetHeight(self.mapView.frame) * self.mapView.region.span.latitudeDelta;
 }
 - (CGFloat)coordinateWidthLengthToviewLength:(CGFloat)length{
-    return length/self.mapView.region.span.latitudeDelta * CGRectGetWidth(self.mapView.frame);
+    return length/self.mapView.region.span.longitudeDelta * CGRectGetWidth(self.mapView.frame);
 }
 - (CGFloat)coordinateHeightLengthToviewLength:(CGFloat)length{
-    return length/self.mapView.region.span.longitudeDelta * CGRectGetHeight(self.mapView.frame);
+    return length/self.mapView.region.span.latitudeDelta * CGRectGetHeight(self.mapView.frame);
 }
 
 - (void)refreshPhotoViewOnMapWithLeftCorner:(CGPoint)leftCorner withSpan:(MKCoordinateSpan)span {
@@ -128,60 +128,50 @@
         return;
     }
     
-    //그림을 완전히 새로 짜야함
-    //먼저 화면에 그려질, 그려진 사진들을 구분해내고
-    //사진에 숫자를 쌓아올린다.
-    //
-    //애니메이션을 어떻게 넣을지가 관건
-    //사라지는 애니메이션
-    //- PABLPointAnnotation 에 사라지는 마킹을하고
-    //- 어디로 사라지는지 index 값을 넣어놓고
-    //- 썸네일을 그릴 때 에니메이션으로 해당 index 뷰로 옮기면서 얿어짐
-    //- 없어지고 난 다음 해당 PABLPointAnnotation 을 mapView에서 제거
-    //- 숫자가 자연스럽게 합쳐지는지 확인 필요
-    //뭉태기에서 분리되는 애니메이션
-    //- PABLPointAnnotation 에 분리되는 마킹을 하고
-    //- 어디로부터 분리되는지 index 값을 넣어놓고
-    //- 썸네일을 그릴 때 애니메이션으로 해당 index 뷰에서 부터 옮기면서 생김
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         CGFloat latitudePaddingSize = [self viewWidthLengthToCoordinateLength:TUMBNAIL_SIZE.width]/2;
         CGFloat longitudePaddingSize = [self viewHeightLengthToCoordinateLength:TUMBNAIL_SIZE.height]/2;
         
         for (PABLPointAnnotation *pablPointAnnotation in self.mapView.annotations) {
             PABLPhoto *photo = [PhotoManager sharedInstance].photoArray[pablPointAnnotation.index];
-            CGFloat latitude = pablPointAnnotation.coordinate.latitude;
             CGFloat longitude = pablPointAnnotation.coordinate.longitude;
+            CGFloat latitude = pablPointAnnotation.coordinate.latitude;
             pablPointAnnotation.pileNum = 1;
-            if (leftCorner.x + latitudePaddingSize > latitude || leftCorner.y + longitudePaddingSize > longitude ||
-                leftCorner.x + span.latitudeDelta - latitudePaddingSize < latitude || leftCorner.y + span.longitudeDelta - longitudePaddingSize < longitude) {
+            if (leftCorner.x + longitudePaddingSize > longitude || leftCorner.y + latitudePaddingSize > latitude ||
+                leftCorner.x + span.longitudeDelta - longitudePaddingSize < longitude || leftCorner.y + span.latitudeDelta - latitudePaddingSize < latitude) {
                 //지도 밖으로 튀어나가서 없애는 작업
                 [self.mapView removeAnnotation:pablPointAnnotation];
                 photo.isAdded = NO;
             } else {
+                CGFloat minLength = CGFLOAT_MAX;
+                PABLPointAnnotation *pileParentsAnnotation = nil;
                 for (PABLPointAnnotation *remainPointAnnotation in self.mapView.annotations) {
                     if (pablPointAnnotation.index == remainPointAnnotation.index) {
                         break;
                     }
                     PABLPhoto *remainPhoto = [PhotoManager sharedInstance].photoArray[remainPointAnnotation.index];
                     if (remainPhoto.isAdded == YES) {
-                        CGFloat addedLatitude = remainPointAnnotation.coordinate.latitude;
                         CGFloat addedLongitude = remainPointAnnotation.coordinate.longitude;
-                        if ([self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
-                            + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)]
-                            < (PILE_LENGTH) * (PILE_LENGTH) + (PILE_LENGTH) * (PILE_LENGTH)) {
+                        CGFloat addedLatitude = remainPointAnnotation.coordinate.latitude;
+                        CGFloat length = [self coordinateWidthLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLongitude - longitude)]
+                        + [self coordinateHeightLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLatitude - latitude)];
+                        if (length < (PILE_LENGTH) * (PILE_LENGTH) + (PILE_LENGTH) * (PILE_LENGTH) && minLength > length) {
                             //한 위치에서 다른위치로 합쳐지는 작업
-                            pablPointAnnotation.actionType = AnnotationActionTypeDisappear;
-                            pablPointAnnotation.departure = pablPointAnnotation.coordinate;
-                            pablPointAnnotation.arrival = remainPointAnnotation.coordinate;
-                            [UIView animateWithDuration:0.2f animations:^{
-                                pablPointAnnotation.coordinate = remainPointAnnotation.coordinate;
-                            } completion:^(BOOL finished) {
-                                [self.mapView removeAnnotation:pablPointAnnotation];
-                            }];
-                            remainPhoto.isAdded = NO;
+                            minLength = length;
+                            pileParentsAnnotation = remainPointAnnotation;
                         }
                     }
+                }
+                if (pileParentsAnnotation != nil) {
+                    pablPointAnnotation.actionType = AnnotationActionTypeDisappear;
+                    pablPointAnnotation.departure = pablPointAnnotation.coordinate;
+                    pablPointAnnotation.arrival = pileParentsAnnotation.coordinate;
+                    [UIView animateWithDuration:0.2f animations:^{
+                        pablPointAnnotation.coordinate = pileParentsAnnotation.coordinate;
+                    } completion:^(BOOL finished) {
+                        [self.mapView removeAnnotation:pablPointAnnotation];
+                    }];
+                    photo.isAdded = NO;
                 }
             }
         }
@@ -191,8 +181,8 @@
         NSInteger num = 0;
         for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
             if (photo.isAdded == NO) {
-                CGFloat latitude = photo.photoData.location.coordinate.latitude;
                 CGFloat longitude = photo.photoData.location.coordinate.longitude;
+                CGFloat latitude = photo.photoData.location.coordinate.latitude;
                 if (latitude == 0 && longitude == 0) {
                     num++;
                     continue;
@@ -202,19 +192,40 @@
                 PABLPointAnnotation *pileParentsAnnotation = nil;
                 
                 for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
-                    CGFloat addedLatitude = addedAnnotation.arrival.latitude;
                     CGFloat addedLongitude = addedAnnotation.arrival.longitude;
-                    CGFloat length = [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLatitude - latitude)]
-                    + [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLongitude - longitude)];
-                    if (length < (PILE_LENGTH) * (PILE_LENGTH) + (PILE_LENGTH) * (PILE_LENGTH)) {
+                    CGFloat addedLatitude = addedAnnotation.arrival.latitude;
+                    CGFloat length = [self coordinateWidthLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLongitude - longitude)]
+                    + [self coordinateHeightLengthToviewLength:fabs(addedLatitude - latitude)] * [self coordinateHeightLengthToviewLength:fabs(addedLatitude - latitude)];
+                    if (length < (PILE_LENGTH) * (PILE_LENGTH) + (PILE_LENGTH) * (PILE_LENGTH) && minLength > length) {
                         //사진이 이미 지도에 그려진 사진에 쌓이는 작업
-                        if (minLength > length) {
-                            minLength = length;
-                            pileParentsAnnotation = addedAnnotation;
-                        }
+                        minLength = length;
+                        pileParentsAnnotation = addedAnnotation;
                     }
                 }
                 if (pileParentsAnnotation != nil) {
+                    //사진이 쌓여진곳에서 쌓여진곳으로 이동하는 작업
+//                    if (photo.pileParents != -1) {
+//                        PABLPhoto *pastParents = (PABLPhoto *)[PhotoManager sharedInstance].photoArray[photo.pileParents];
+//                        BOOL addTemp = YES;
+//                        for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
+//                            if (addedAnnotation.departure.latitude == pastParents.photoData.location.coordinate.latitude &&
+//                                addedAnnotation.departure.longitude == pastParents.photoData.location.coordinate.longitude &&
+//                                addedAnnotation.arrival.latitude == pileParentsAnnotation.coordinate.latitude &&
+//                                addedAnnotation.arrival.longitude == pileParentsAnnotation.coordinate.longitude) {
+//                                addTemp = NO;
+//                            }
+//                        }
+//                        if (addTemp == YES) {
+//                            PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
+//                            annotation.actionType = AnnotationActionTypeTemp;
+//                            annotation.index = num;
+//                            annotation.pileNum = 1;
+//                            annotation.departure = pastParents.photoData.location.coordinate;
+//                            annotation.arrival = pileParentsAnnotation.coordinate;
+//                            [annotation setCoordinate:annotation.departure];
+//                            [self.mapView addAnnotation:annotation];
+//                        }
+//                    }
                     pileParentsAnnotation.pileNum++;
                     photo.isAdded = NO;
                     photo.pileParents = pileParentsAnnotation.index;
@@ -224,8 +235,8 @@
                 }
                 
                 if (canAdd == YES &&
-                    leftCorner.x + latitudePaddingSize <= latitude && leftCorner.y  + longitudePaddingSize <= longitude &&
-                    leftCorner.x + span.latitudeDelta - latitudePaddingSize >= latitude && leftCorner.y + span.longitudeDelta - longitudePaddingSize >= longitude) {
+                    leftCorner.x + longitudePaddingSize < longitude && leftCorner.y  + latitudePaddingSize < latitude &&
+                    leftCorner.x + span.longitudeDelta - longitudePaddingSize > longitude && leftCorner.y + span.latitudeDelta - latitudePaddingSize > latitude) {
                     //사진이 지도에 들어가는 작업
                     CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude, longitude);
                     PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
@@ -328,12 +339,19 @@
 - (void)mapView:(MKMapView *)mapView didAddAnnotationViews:(NSArray<MKAnnotationView *> *)views {
     for (PABLThumbnailView *view in views) {
         PABLPointAnnotation *pointAnnotation = (PABLPointAnnotation *)view.annotation;
-        if (pointAnnotation.actionType == AnnotationActionTypeAppear &&
-            pointAnnotation.departure.latitude != pointAnnotation.arrival.latitude &&
+        if (pointAnnotation.departure.latitude != pointAnnotation.arrival.latitude &&
             pointAnnotation.departure.longitude != pointAnnotation.arrival.longitude) {
-            [UIView animateWithDuration:0.2f animations:^{
-                [pointAnnotation setCoordinate:pointAnnotation.arrival];
-            }];
+            if (pointAnnotation.actionType == AnnotationActionTypeAppear) {
+                [UIView animateWithDuration:0.2f animations:^{
+                    [pointAnnotation setCoordinate:pointAnnotation.arrival];
+                }];
+            } else if (pointAnnotation.actionType == AnnotationActionTypeTemp) {
+                [UIView animateWithDuration:0.2f animations:^{
+                    [pointAnnotation setCoordinate:pointAnnotation.arrival];
+                } completion:^(BOOL finished) {
+                    [self.mapView removeAnnotation:pointAnnotation];
+                }];
+            }
         }
     }
 }
@@ -341,8 +359,8 @@
 #pragma mark - Map Action
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
     CGPoint leftCorner = CGPointZero;
-    leftCorner.x = mapView.region.center.latitude - mapView.region.span.latitudeDelta/2;
-    leftCorner.y = mapView.region.center.longitude - mapView.region.span.longitudeDelta/2;
+    leftCorner.x = mapView.region.center.longitude - mapView.region.span.longitudeDelta/2;
+    leftCorner.y = mapView.region.center.latitude - mapView.region.span.latitudeDelta/2;
     
     [self refreshPhotoViewOnMapWithLeftCorner:leftCorner withSpan:mapView.region.span];
 }
