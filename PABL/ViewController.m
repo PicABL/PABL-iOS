@@ -127,7 +127,6 @@
     if (self.welcomeView.hidden == NO) {
         return;
     }
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         CGFloat latitudePaddingSize = [self viewWidthLengthToCoordinateLength:TUMBNAIL_SIZE.width]/2;
         CGFloat longitudePaddingSize = [self viewHeightLengthToCoordinateLength:TUMBNAIL_SIZE.height]/2;
@@ -192,6 +191,9 @@
                 PABLPointAnnotation *pileParentsAnnotation = nil;
                 
                 for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
+                    if (addedAnnotation.actionType == AnnotationActionTypeTemp) {
+                        continue;
+                    }
                     CGFloat addedLongitude = addedAnnotation.arrival.longitude;
                     CGFloat addedLatitude = addedAnnotation.arrival.latitude;
                     CGFloat length = [self coordinateWidthLengthToviewLength:fabs(addedLongitude - longitude)] * [self coordinateWidthLengthToviewLength:fabs(addedLongitude - longitude)]
@@ -204,28 +206,30 @@
                 }
                 if (pileParentsAnnotation != nil) {
                     //사진이 쌓여진곳에서 쌓여진곳으로 이동하는 작업
-//                    if (photo.pileParents != -1) {
-//                        PABLPhoto *pastParents = (PABLPhoto *)[PhotoManager sharedInstance].photoArray[photo.pileParents];
-//                        BOOL addTemp = YES;
-//                        for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
-//                            if (addedAnnotation.departure.latitude == pastParents.photoData.location.coordinate.latitude &&
-//                                addedAnnotation.departure.longitude == pastParents.photoData.location.coordinate.longitude &&
-//                                addedAnnotation.arrival.latitude == pileParentsAnnotation.coordinate.latitude &&
-//                                addedAnnotation.arrival.longitude == pileParentsAnnotation.coordinate.longitude) {
-//                                addTemp = NO;
-//                            }
-//                        }
-//                        if (addTemp == YES) {
-//                            PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
-//                            annotation.actionType = AnnotationActionTypeTemp;
-//                            annotation.index = num;
-//                            annotation.pileNum = 1;
-//                            annotation.departure = pastParents.photoData.location.coordinate;
-//                            annotation.arrival = pileParentsAnnotation.coordinate;
-//                            [annotation setCoordinate:annotation.departure];
-//                            [self.mapView addAnnotation:annotation];
-//                        }
-//                    }
+                    if (photo.pileParents != -1) {
+                        PABLPhoto *pastParents = (PABLPhoto *)[PhotoManager sharedInstance].photoArray[photo.pileParents];
+                        BOOL addTemp = YES;
+                        for (PABLPointAnnotation *addedAnnotation in self.mapView.annotations) {
+                            if ((fabs(addedAnnotation.departure.latitude - pastParents.photoData.location.coordinate.latitude) < 0.00001  &&
+                                fabs(addedAnnotation.departure.longitude - pastParents.photoData.location.coordinate.longitude) < 0.00001 &&
+                                fabs(addedAnnotation.arrival.latitude - pileParentsAnnotation.coordinate.latitude) < 0.00001 &&
+                                fabs(addedAnnotation.arrival.longitude - pileParentsAnnotation.coordinate.longitude) < 0.00001) ||
+                                (fabs(pileParentsAnnotation.coordinate.latitude - pastParents.photoData.location.coordinate.latitude) < 0.00001 &&
+                                 fabs(pileParentsAnnotation.coordinate.longitude - pastParents.photoData.location.coordinate.longitude) < 0.00001)) {
+                                addTemp = NO;
+                            }
+                        }
+                        if (addTemp == YES) {
+                            PABLPointAnnotation *annotation = [[PABLPointAnnotation alloc]init];
+                            annotation.actionType = AnnotationActionTypeTemp;
+                            annotation.index = num;
+                            annotation.pileNum = 1;
+                            annotation.departure = pastParents.photoData.location.coordinate;
+                            annotation.arrival = pileParentsAnnotation.coordinate;
+                            [annotation setCoordinate:annotation.departure];
+                            [self.mapView addAnnotation:annotation];
+                        }
+                    }
                     pileParentsAnnotation.pileNum++;
                     photo.isAdded = NO;
                     photo.pileParents = pileParentsAnnotation.index;
@@ -275,6 +279,9 @@
         [self.dimmView setAlpha:0.0f];
         [self.detailView setAlpha:0.0f];
     } completion:^(BOOL finished) {
+        for (UIView *view in self.dimmView.subviews) {
+            [view removeFromSuperview];
+        }
         [self.dimmView removeFromSuperview];
         [self.detailView removeFromSuperview];
     }];
@@ -288,10 +295,17 @@
     [self.dimmView setAlpha:0.0f];
     [self.mapView addSubview:self.dimmView];
     
+    
     [self.detailView setFrame:CGRectMake(40, 40, CGRectGetWidth(self.mapView.frame) - 80, CGRectGetHeight(self.mapView.frame) - 80)];
     [self.detailView setAlpha:0.0f];
     [self.mapView addSubview:self.detailView];
     PABLThumbnailView *thumbnailView = (PABLThumbnailView *)pablThumbnailView;
+    //debug code
+    UILabel *debugLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 200, 50)];
+    [debugLabel setText:[NSString stringWithFormat:@"%ld",thumbnailView.index]];
+    [debugLabel setTextColor:[UIColor whiteColor]];
+    [self.dimmView addSubview:debugLabel];
+    
     [thumbnailView.photo getImageWithSize:self.detailView.frame.size WithCompletion:^(UIImage *image) {
         self.detailView.image = image;
         CGSize imageSize = image.size;
@@ -321,7 +335,8 @@
     [annotationView setDelegate:self];
     [annotationView setPhoto:(PABLPhoto *)[PhotoManager sharedInstance].photoArray[pointAnnotation.index]];
     [annotationView setPileNum:pointAnnotation.pileNum];
-    [annotationView setAnnotation:annotation];
+    [annotationView setIndex:pointAnnotation.index];
+    [annotationView setAnnotation:pointAnnotation];
     [annotationView setRightCalloutAccessoryView:[UIButton buttonWithType:UIButtonTypeDetailDisclosure]];
     [annotationView setEnabled:YES];
     [annotationView setCanShowCallout:YES];
@@ -342,11 +357,11 @@
         if (pointAnnotation.departure.latitude != pointAnnotation.arrival.latitude &&
             pointAnnotation.departure.longitude != pointAnnotation.arrival.longitude) {
             if (pointAnnotation.actionType == AnnotationActionTypeAppear) {
-                [UIView animateWithDuration:0.2f animations:^{
+                [UIView animateWithDuration:0.3f animations:^{
                     [pointAnnotation setCoordinate:pointAnnotation.arrival];
                 }];
             } else if (pointAnnotation.actionType == AnnotationActionTypeTemp) {
-                [UIView animateWithDuration:0.2f animations:^{
+                [UIView animateWithDuration:0.3f animations:^{
                     [pointAnnotation setCoordinate:pointAnnotation.arrival];
                 } completion:^(BOOL finished) {
                     [self.mapView removeAnnotation:pointAnnotation];

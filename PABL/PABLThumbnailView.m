@@ -65,7 +65,7 @@
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     if (self.delegate) {
-        if (self.pileNum > 1 && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailViewWithManyPiles:)]) {
+        if (false && self.pileNum > 1 && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailViewWithManyPiles:)]) {
             [self.delegate didTappedPABLThumbnailViewWithManyPiles:self];
         } else if ([self.delegate respondsToSelector:@selector(didTappedPABLThumbnailView:)]) {
             [self.delegate didTappedPABLThumbnailView:self];
