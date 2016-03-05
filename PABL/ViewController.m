@@ -11,6 +11,7 @@
 #import "PABLPhoto.h"
 #import "PABLPointAnnotation.h"
 #import "PABLThumbnailView.h"
+#import "PABLDetailScrollView.h"
 
 #define MENU_BUTTON_SIZE 40.0f
 #define MENU_BUTTON_PADDING 20.0f
@@ -18,8 +19,9 @@
 #define ALERT_LABEL_WIDTH 200.0f
 #define ALERT_LABEL_HEIGHT 10.0f
 #define PILE_LENGTH 70.0f
+#define DETAILVIEW_TOPPADDING 60.0f
 
-@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate, PABLThumbnailViewDelegate>
+@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate, PABLMenuViewControllerDelegate, PABLThumbnailViewDelegate, PABLDetailScrollViewDelegate>
 
 @property (nonatomic, strong) UIView *welcomeView;
 
@@ -32,7 +34,7 @@
 @property (nonatomic, strong) PABLMenuViewController *menuView;
 
 @property (nonatomic, strong) UIView *dimmView;
-@property (nonatomic, strong) UIImageView *detailView;
+@property (nonatomic, strong) PABLDetailScrollView *pablDetailScrollView;
 
 @property (nonatomic, assign) BOOL isMine;
 
@@ -273,55 +275,57 @@
     });
 }
 
-#pragma mark - PABLThumbnailViewDelegate
-- (void)didTappedDetailView {
+#pragma mark - PABLDetailScrollViewDelegate
+
+- (void)PABLDetailScrollViewDidTouched {
     [UIView animateWithDuration:0.3f animations:^{
         [self.dimmView setAlpha:0.0f];
-        [self.detailView setAlpha:0.0f];
+        [self.pablDetailScrollView setAlpha:0.0f];
     } completion:^(BOOL finished) {
         for (UIView *view in self.dimmView.subviews) {
             [view removeFromSuperview];
         }
+        [self.pablDetailScrollView removeFromSuperview];
         [self.dimmView removeFromSuperview];
-        [self.detailView removeFromSuperview];
     }];
 }
 
-- (void)didTappedPABLThumbnailViewWithManyPiles:(MKAnnotationView *)pablThumbnailView {
-}
+#pragma mark - PABLThumbnailViewDelegate
 
 - (void)didTappedPABLThumbnailView:(MKAnnotationView *)pablThumbnailView {
+    PABLThumbnailView *thumbnailView = (PABLThumbnailView *)pablThumbnailView;
+    
     [self.dimmView setFrame:self.mapView.frame];
     [self.dimmView setAlpha:0.0f];
     [self.mapView addSubview:self.dimmView];
     
+    [self.pablDetailScrollView setFrame:CGRectMake(0, DETAILVIEW_TOPPADDING, CGRectGetWidth(self.mapView.frame), CGRectGetHeight(self.mapView.frame) - DETAILVIEW_TOPPADDING*2)];
+    [self.pablDetailScrollView setAlpha:0.0f];
+    NSMutableArray *photoArray = [[NSMutableArray alloc]init];
+    [photoArray addObject:[PhotoManager sharedInstance].photoArray[thumbnailView.index]];
+    for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
+        if (photo.pileParents == thumbnailView.index) {
+            [photoArray addObject:photo];
+        }
+    }
+    self.pablDetailScrollView.photoArray = photoArray;
+    self.pablDetailScrollView.currentPage = 0;
+    self.pablDetailScrollView.totalPage = thumbnailView.pileNum;
+    self.pablDetailScrollView.delegate = self;
+    [self.pablDetailScrollView prepareToShowImage];
+    [self.mapView addSubview:self.pablDetailScrollView];
     
-    [self.detailView setFrame:CGRectMake(40, 40, CGRectGetWidth(self.mapView.frame) - 80, CGRectGetHeight(self.mapView.frame) - 80)];
-    [self.detailView setAlpha:0.0f];
-    [self.mapView addSubview:self.detailView];
-    PABLThumbnailView *thumbnailView = (PABLThumbnailView *)pablThumbnailView;
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.dimmView setAlpha:0.85f];
+        [self.pablDetailScrollView setAlpha:1.0f];
+    }];
+    
+    
     //debug code
     UILabel *debugLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 200, 50)];
     [debugLabel setText:[NSString stringWithFormat:@"%ld",thumbnailView.index]];
     [debugLabel setTextColor:[UIColor whiteColor]];
     [self.dimmView addSubview:debugLabel];
-    
-    [thumbnailView.photo getImageWithSize:self.detailView.frame.size WithCompletion:^(UIImage *image) {
-        self.detailView.image = image;
-        CGSize imageSize = image.size;
-        if (imageSize.width >= self.mapView.frame.size.width) {
-            imageSize.width = self.mapView.frame.size.width - 100;
-        }
-        if (imageSize.height >= self.mapView.frame.size.height) {
-            imageSize.height = self.mapView.frame.size.height - 100;
-        }
-        [self.detailView setFrame:CGRectMake(0, 0, image.size.width, image.size.height)];
-        self.detailView.center = self.mapView.center;
-    }];
-    [UIView animateWithDuration:0.3f animations:^{
-        [self.dimmView setAlpha:0.85f];
-        [self.detailView setAlpha:1.0f];
-    }];
 }
 
 #pragma mark - MapViewDelegate
@@ -564,16 +568,11 @@
     }
     return _dimmView;
 }
-
-- (UIImageView *)detailView {
-    if (_detailView == nil) {
-        _detailView = [[UIImageView alloc]init];
-        [_detailView setBackgroundColor:[UIColor blackColor]];
-        [_detailView setContentMode:UIViewContentModeScaleAspectFit];
-        [_detailView setUserInteractionEnabled:YES];
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didTappedDetailView)];
-        [_detailView addGestureRecognizer:tapGesture];
+- (PABLDetailScrollView *)pablDetailScrollView {
+    if (_pablDetailScrollView == nil) {
+        _pablDetailScrollView = [[PABLDetailScrollView alloc]init];
     }
-    return _detailView;
+    return _pablDetailScrollView;
 }
+
 @end

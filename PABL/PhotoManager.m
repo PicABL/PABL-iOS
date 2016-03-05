@@ -48,8 +48,10 @@ static PhotoManager *instance = nil;
             PHContentEditingInputRequestOptions *options = [[PHContentEditingInputRequestOptions alloc] init];
             options.networkAccessAllowed = YES;
             for (PHAsset *photo in assetsFetchResults) {
-                PABLPhoto *pablPhoto = [[PABLPhoto alloc]initWithPHAsset:photo];
-                [self.photoArray addObject:pablPhoto];
+                if (photo.mediaType == PHAssetMediaTypeImage) {
+                    PABLPhoto *pablPhoto = [[PABLPhoto alloc]initWithPHAsset:photo];
+                    [self.photoArray addObject:pablPhoto];
+                }
             }
         }
         @catch (NSException *exception) {

@@ -28,7 +28,6 @@
 }
 
 - (void)getThumbnailImageWithCompletion:(void(^)(UIImage *image))completion {
-    self.imageOptions.version = PHImageRequestOptionsVersionCurrent;
     [self.imageManager requestImageForAsset:self.photoData
                                  targetSize:TUMBNAIL_SIZE
                                 contentMode:PHImageContentModeAspectFit
@@ -39,7 +38,6 @@
 }
 
 - (void)getImageWithSize:(CGSize)imageSize WithCompletion:(void(^)(UIImage *image))completion{
-    self.imageOptions.version = PHImageRequestOptionsVersionOriginal;
     [self.imageManager requestImageForAsset:self.photoData
                                  targetSize:imageSize
                                 contentMode:PHImageContentModeAspectFit

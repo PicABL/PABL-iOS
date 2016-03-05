@@ -64,12 +64,8 @@
 #pragma mark - touch action
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    if (self.delegate) {
-        if (false && self.pileNum > 1 && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailViewWithManyPiles:)]) {
-            [self.delegate didTappedPABLThumbnailViewWithManyPiles:self];
-        } else if ([self.delegate respondsToSelector:@selector(didTappedPABLThumbnailView:)]) {
-            [self.delegate didTappedPABLThumbnailView:self];
-        }
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didTappedPABLThumbnailView:)]) {
+        [self.delegate didTappedPABLThumbnailView:self];
     }
 }
 
