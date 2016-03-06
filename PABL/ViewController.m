@@ -445,7 +445,7 @@
                                                                        CGRectGetMinY(self.menuSpreadButton.frame) - ALERT_LABEL_HEIGHT,
                                                                        ALERT_LABEL_WIDTH,
                                                                        ALERT_LABEL_HEIGHT)];
-        [alertLabel setFont:[UIFont fontWithName:@"AvenirNext-Regular" size:10.0f]];
+        [alertLabel setFont:[UIFont fontWithName:@"AvenirNext-Regular" size:12.0f]];
         [alertLabel setTextColor:[UIColor blackColor]];
         [alertLabel setBackgroundColor:[UIColor clearColor]];
         [alertLabel setText:@"Your pictures are already added!"];

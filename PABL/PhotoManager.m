@@ -32,17 +32,16 @@ static PhotoManager *instance = nil;
         PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
         [albumArray addObject:assetCollection];
     }];
-    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
-    [topLevelUserCollections enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
-        [albumArray addObject:assetCollection];
-    }];
+    //앨범을 더 많이 불러올 필요는 없다.
+//    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
+//    [topLevelUserCollections enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+//        PHAssetCollection *assetCollection = (PHAssetCollection *)obj;
+//        [albumArray addObject:assetCollection];
+//    }];
     
     for (PHAssetCollection *album in albumArray) {
         @try {
             PHFetchOptions *option = [PHFetchOptions new];
-            //여기서 로케이션 정보만 가져오는 방법을 고려
-            //쿼리느낌으로
             [option setPredicate:[NSPredicate predicateWithFormat:@"mediaType == %d or mediaType == %d", PHAssetMediaTypeImage, PHAssetMediaTypeVideo]];
             PHFetchResult *assetsFetchResults = [PHAsset fetchAssetsInAssetCollection:album options:option];
             PHContentEditingInputRequestOptions *options = [[PHContentEditingInputRequestOptions alloc] init];
