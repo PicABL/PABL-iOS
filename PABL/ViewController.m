@@ -31,7 +31,7 @@
 @property (nonatomic, strong) UIView *menuSpreadButton;
 @property (nonatomic, strong) UIView *animationView;
 @property (nonatomic, strong) MKMapView *mapView;
-@property (nonatomic, strong) PABLMenuViewController *menuView;
+@property (nonatomic, strong) PABLMenuViewController *menuViewController;
 
 @property (nonatomic, strong) UIView *dimmView;
 @property (nonatomic, strong) PABLDetailScrollView *pablDetailScrollView;
@@ -77,8 +77,6 @@
     [NSTimer scheduledTimerWithTimeInterval:2.0f target:self selector:@selector(dismissWelcomeView) userInfo:nil repeats:NO];
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(menuSpreadButtonTouched)];
     [self.menuSpreadButton addGestureRecognizer:tapGesture];
-    UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPressTest:)];
-    [self.menuSpreadButton addGestureRecognizer:longPressGesture];
 }
 
 
@@ -395,78 +393,34 @@
 
 #pragma mark - touch event
 
-- (void)longPressTest:(UILongPressGestureRecognizer *)longPress {
-    if (longPress.state == UIGestureRecognizerStateBegan) {
-        CGPoint menuCenter = CGPointMake(CGRectGetWidth(self.mapView.frame)/2, CGRectGetHeight(self.mapView.frame)/2);
-        [self.animationView setFrame:CGRectMake(menuCenter.x, menuCenter.y - 1, 0, 2)];
-        [UIView animateWithDuration:0.3f animations:^{
-            [self.menuSpreadButton setCenter:menuCenter];
-        } completion:^(BOOL finished) {
-            CGRect animationViewFrame = self.animationView.frame;
-            animationViewFrame.origin.x = 0;
-            animationViewFrame.size.width = self.mapView.frame.size.width;
-            [UIView animateWithDuration:0.5f animations:^{
-                [self.animationView setFrame:animationViewFrame];
-            } completion:^(BOOL finished) {
-                [UIView animateWithDuration:0.3f animations:^{
-                    [self.animationView setFrame:self.mapView.frame];
-                } completion:^(BOOL finished){
-                    [self presentViewController:self.menuView animated:NO completion:^{
-                    }];
-                }];
-            }];
-        }];
-    }
-}
-
 - (void)menuSpreadButtonTouched {
-    if (self.isMine == NO) {
-        CGPoint menuCenter = CGPointMake(CGRectGetWidth(self.mapView.frame)/2, CGRectGetHeight(self.mapView.frame)/2);
-        [self.animationView setFrame:CGRectMake(menuCenter.x, menuCenter.y - 1, 0, 2)];
-        [UIView animateWithDuration:0.3f animations:^{
-            [self.menuSpreadButton setCenter:menuCenter];
+    NSMutableArray *photoArray = [[NSMutableArray alloc]init];
+    for (PABLPhoto *photo in [PhotoManager sharedInstance].photoArray) {
+        if (photo.photoData.location.coordinate.longitude == 0 && photo.photoData.location.coordinate.latitude == 0) {
+            [photoArray addObject:photo];
+        }
+    }
+    [self.menuViewController setPhotoArray:photoArray];
+    
+    CGPoint menuCenter = CGPointMake(CGRectGetWidth(self.mapView.frame)/2, CGRectGetHeight(self.mapView.frame)/2);
+    [self.animationView setFrame:CGRectMake(menuCenter.x, menuCenter.y - 1, 0, 2)];
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.menuSpreadButton setCenter:menuCenter];
+    } completion:^(BOOL finished) {
+        CGRect animationViewFrame = self.animationView.frame;
+        animationViewFrame.origin.x = 0;
+        animationViewFrame.size.width = self.mapView.frame.size.width;
+        [UIView animateWithDuration:0.5f animations:^{
+            [self.animationView setFrame:animationViewFrame];
         } completion:^(BOOL finished) {
-            CGRect animationViewFrame = self.animationView.frame;
-            animationViewFrame.origin.x = 0;
-            animationViewFrame.size.width = self.mapView.frame.size.width;
-            [UIView animateWithDuration:0.5f animations:^{
-                [self.animationView setFrame:animationViewFrame];
-            } completion:^(BOOL finished) {
-                [UIView animateWithDuration:0.3f animations:^{
-                    [self.animationView setFrame:self.mapView.frame];
-                } completion:^(BOOL finished){
-                    [self presentViewController:self.menuView animated:NO completion:^{
-                    }];
+            [UIView animateWithDuration:0.3f animations:^{
+                [self.animationView setFrame:self.mapView.frame];
+            } completion:^(BOOL finished){
+                [self presentViewController:self.menuViewController animated:NO completion:^{
                 }];
             }];
         }];
-    } else {
-        UILabel *alertLabel = [[UILabel alloc]initWithFrame:CGRectMake(CGRectGetWidth(self.mapView.frame) - ALERT_LABEL_WIDTH,
-                                                                       CGRectGetMinY(self.menuSpreadButton.frame) - ALERT_LABEL_HEIGHT,
-                                                                       ALERT_LABEL_WIDTH,
-                                                                       ALERT_LABEL_HEIGHT)];
-        [alertLabel setFont:[UIFont fontWithName:@"AvenirNext-Regular" size:12.0f]];
-        [alertLabel setTextColor:[UIColor blackColor]];
-        [alertLabel setBackgroundColor:[UIColor clearColor]];
-        [alertLabel setText:@"Your pictures are already added!"];
-        [alertLabel setAlpha:0.0f];
-        [self.mapView addSubview:alertLabel];
-        CGRect alertLabelMoveFrame = alertLabel.frame;
-        alertLabelMoveFrame.origin.y -= ALERT_LABEL_HEIGHT;
-        [UIView animateWithDuration:1.0f animations:^{
-            [alertLabel setAlpha:1.0f];
-            [alertLabel setFrame:alertLabelMoveFrame];
-        } completion:^(BOOL finished) {
-            CGRect alertLabelMoveFrame = alertLabel.frame;
-            alertLabelMoveFrame.origin.y -= ALERT_LABEL_HEIGHT;
-            [UIView animateWithDuration:1.0f animations:^{
-                [alertLabel setAlpha:0.0f];
-                [alertLabel setFrame:alertLabelMoveFrame];
-            } completion:^(BOOL finished) {
-                [alertLabel removeFromSuperview];
-            }];
-        }];
-    }
+    }];
 }
 
 
@@ -545,12 +499,12 @@
     return _mapView;
 }
 
-- (PABLMenuViewController *)menuView {
-    if(_menuView == nil) {
-        _menuView = [[PABLMenuViewController alloc]initWithViewController:self];
-        [_menuView setDelegate:self];
+- (PABLMenuViewController *)menuViewController {
+    if(_menuViewController == nil) {
+        _menuViewController = [[PABLMenuViewController alloc]initWithViewController:self];
+        [_menuViewController setDelegate:self];
     }
-    return _menuView;
+    return _menuViewController;
 }
 
 - (UIView *)animationView {

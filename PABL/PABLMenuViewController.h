@@ -18,6 +18,7 @@
 @interface PABLMenuViewController : UIViewController
 
 @property (nonatomic, strong) id<PABLMenuViewControllerDelegate> delegate;
+@property (nonatomic, strong) NSArray *photoArray;
 
 - (instancetype)initWithViewController:(UIViewController *)viewController;
 - (void)closeMenuViewController;

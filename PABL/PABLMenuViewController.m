@@ -41,20 +41,35 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self.pablMenuView setFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame))];
-}
+    [self.pablMenuView prepareToLoad];
+    
+    //일단 10개만
+    //재활용하도록 바꾸면 다 그리게
+    NSInteger num = 0;
+    for (PABLPhoto *photo in self.photoArray) {
+        [self.pablMenuView addPhotoToTopOfView:photo];
+        num++;
+        if (num > 20) break;
+    }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
     [self.pablMenuView setAlpha:0.0f];
     [UIView animateWithDuration:0.3f animations:^{
         [self.pablMenuView setAlpha:1.0f];
     }];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+}
+
 #pragma mark - PABLMenuViewDelegate
 
 - (void)didTouchedCloseButton {
     [self closeMenuViewController];
+}
+
+- (PABLPhoto *)getPhotoWithIndex:(NSInteger)index {
+    return self.photoArray[index];
 }
 
 #pragma mark - generators

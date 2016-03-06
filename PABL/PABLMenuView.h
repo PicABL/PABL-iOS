@@ -7,15 +7,20 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PABLPhoto.h"
 
 @protocol PABLMenuViewDelegate <NSObject>
 
 - (void)didTouchedCloseButton;
+- (PABLPhoto *)getPhotoWithIndex:(NSInteger)index;
 
 @end
 
 @interface PABLMenuView : UIView
 
 @property (nonatomic, assign) id<PABLMenuViewDelegate> delegate;
+
+- (void)prepareToLoad;
+- (void)addPhotoToTopOfView:(PABLPhoto *)photo;
 
 @end
