@@ -47,9 +47,9 @@
     //재활용하도록 바꾸면 다 그리게
     NSInteger num = 0;
     for (PABLPhoto *photo in self.photoArray) {
-        [self.pablMenuView addPhotoToTopOfView:photo];
+        [self.pablMenuView addPhotoToTopOfView:photo withIndex:num];
         num++;
-        if (num > 20) break;
+        if (num > 10) break;
     }
 
     [self.pablMenuView setAlpha:0.0f];
@@ -69,6 +69,8 @@
 }
 
 - (PABLPhoto *)getPhotoWithIndex:(NSInteger)index {
+    if (index < 0) return nil;
+    if (index > self.photoArray.count - 1) return nil;
     return self.photoArray[index];
 }
 

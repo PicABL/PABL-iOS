@@ -21,6 +21,6 @@
 @property (nonatomic, assign) id<PABLMenuViewDelegate> delegate;
 
 - (void)prepareToLoad;
-- (void)addPhotoToTopOfView:(PABLPhoto *)photo;
+- (void)addPhotoToTopOfView:(PABLPhoto *)photo withIndex:(NSInteger)index;
 
 @end

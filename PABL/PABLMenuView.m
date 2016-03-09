@@ -7,16 +7,21 @@
 //
 
 #import "PABLMenuView.h"
+#import "Common.h"
 
 #define DEFAULT_SIZE CGSizeMake(100, 100)
 #define IMAGE_PADDING 3.0f
+#define TITLEVIEW_HEIGHT 60.0f
+#define CHANNELLIST_WIDTH 200.0f
 
-@interface PABLMenuView () <UIGestureRecognizerDelegate>
+@interface PABLMenuView () <UIGestureRecognizerDelegate, UIScrollViewDelegate>
 
+@property (nonatomic, strong) UIView *headerView;
+@property (nonatomic, strong) UIView *channelListView;
 @property (nonatomic, strong) UIScrollView *scrollView;
-@property (nonatomic, assign) CGPoint pictureLeftCorner;
+@property (nonatomic, assign) CGFloat minHeight;
 @property (nonatomic, assign) CGFloat maxHeight;
-@property (nonatomic, assign) NSInteger viewCount;
+@property (nonatomic, assign) NSInteger currentPage;
 
 @end
 
@@ -26,78 +31,131 @@
     if (self = [super init]) {
         [self setBackgroundColor:[UIColor whiteColor]];
         [self addSubview:self.scrollView];
+        [self addSubview:self.headerView];
+        [self addSubview:self.channelListView];
         
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(touchedCloseButton)];
-        [tapGesture setNumberOfTapsRequired:2];
-        [self addGestureRecognizer:tapGesture];
+
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(toggleChannelView)];
+        [self.headerView addGestureRecognizer:tapGesture];
+        UITapGestureRecognizer *closeTapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(touchedCloseButton)];
+        [closeTapGesture setNumberOfTapsRequired:2];
+        [tapGesture requireGestureRecognizerToFail:closeTapGesture];
+        [self.headerView addGestureRecognizer:closeTapGesture];
+        
     }
     return self;
 }
 
 - (void)prepareToLoad {
-    self.pictureLeftCorner = CGPointMake(IMAGE_PADDING , IMAGE_PADDING + 40);
-    self.maxHeight = IMAGE_PADDING + 40;
-    self.viewCount = 0;
+    self.minHeight = 0;
+    self.maxHeight = 0;
+    self.currentPage = 0;
+    [self.scrollView setContentOffset:CGPointMake(0, 0)];
+    if (CGRectGetMinX(self.channelListView.frame) >= 0 && self.channelListView.frame.size.width > 0) {
+        [self.channelListView setFrame:CGRectMake(-CHANNELLIST_WIDTH, 0, CHANNELLIST_WIDTH, CGRectGetHeight(self.frame))];
+    }
     for (UIView *view in self.scrollView.subviews) {
         [view removeFromSuperview];
     }
 }
 
 - (void)layoutSubviews {
-    [self.scrollView setFrame:self.frame];
+    [self.headerView setFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), TITLEVIEW_HEIGHT)];
+    [self.scrollView setFrame:CGRectMake(0, CGRectGetMaxY(self.headerView.frame), CGRectGetWidth(self.frame), CGRectGetHeight(self.frame) - TITLEVIEW_HEIGHT)];
+    [self.channelListView setFrame:CGRectMake(-CHANNELLIST_WIDTH, 0, CHANNELLIST_WIDTH, CGRectGetHeight(self.frame))];
+}
+
+- (void)setMaxHeight:(CGFloat)maxHeight {
+    _maxHeight = maxHeight;
     [self.scrollView setContentSize:CGSizeMake(self.frame.size.width, self.maxHeight)];
 }
 
-- (void)addPhotoToTopOfView:(PABLPhoto *)photo {
-    //view 재사용하게 바꿔야함
-    //딜리게이트로
+- (void)addPhotoToTopOfView:(PABLPhoto *)photo withIndex:(NSInteger)index {
     [photo getImageWithSize:CGSizeMake(CGRectGetWidth(self.frame), CGRectGetHeight(self.frame)) WithCompletion:^(UIImage *image) {
-        if (image.size.width > image.size.height) {
-            CGSize imageViewSize = CGSizeZero;
-            imageViewSize.width = CGRectGetWidth(self.frame) - IMAGE_PADDING * 2 - DEFAULT_SIZE.width;
-            imageViewSize.height = imageViewSize.width / image.size.width * image.size.height;
-            if (self.pictureLeftCorner.x + imageViewSize.width > CGRectGetWidth(self.frame) || self.pictureLeftCorner.y < self.maxHeight) {
-                self.pictureLeftCorner = CGPointMake(IMAGE_PADDING, self.maxHeight);
-            }
-            UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(self.pictureLeftCorner.x + (self.viewCount % 2 == 0 ? 0 : DEFAULT_SIZE.width),
-                                                                                  self.pictureLeftCorner.y,
-                                                                                  imageViewSize.width,
-                                                                                  imageViewSize.height)];
-            [imageView setImage:image];
-            [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
-            [imageView.layer setBorderWidth:0.5f];
-            [imageView.layer setCornerRadius:2.0f];
-            [imageView setClipsToBounds:YES];
-            [imageView setContentMode:UIViewContentModeScaleAspectFit];
-            [self.scrollView addSubview:imageView];
-            self.maxHeight = self.pictureLeftCorner.y + imageViewSize.height + IMAGE_PADDING;
-            self.pictureLeftCorner = CGPointMake(IMAGE_PADDING, self.maxHeight);
-        } else {
-            CGSize imageViewSize = CGSizeZero;
-            imageViewSize.width = (CGRectGetWidth(self.frame) - IMAGE_PADDING * 3) / 2;
-            imageViewSize.height = imageViewSize.width / image.size.width * image.size.height;
-            UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(self.pictureLeftCorner.x,
-                                                                                  self.pictureLeftCorner.y,
-                                                                                  imageViewSize.width,
-                                                                                  imageViewSize.height)];
-            [imageView setImage:image];
-            [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
-            [imageView.layer setBorderWidth:0.5f];
-            [imageView.layer setCornerRadius:2.0f];
-            [imageView setClipsToBounds:YES];
-            [imageView setContentMode:UIViewContentModeScaleToFill];
-            [self.scrollView addSubview:imageView];
-            self.maxHeight = self.pictureLeftCorner.y + imageViewSize.height + IMAGE_PADDING;
-            if (CGRectGetMaxX(imageView.frame) + IMAGE_PADDING >= CGRectGetWidth(self.frame)) {
-                self.pictureLeftCorner = CGPointMake(IMAGE_PADDING, self.maxHeight - (imageViewSize.height / 9 * 2));
-            } else {
-                self.pictureLeftCorner = CGPointMake(CGRectGetMaxX(imageView.frame) + IMAGE_PADDING
-                                                     , self.pictureLeftCorner.y + imageViewSize.height / 3);
-            }
-        }
-        [self.scrollView setContentSize:CGSizeMake(self.frame.size.width, self.maxHeight)];
-        self.viewCount++;
+        CGSize imageViewSize = CGSizeZero;
+        imageViewSize.width = CGRectGetWidth(self.frame);
+        imageViewSize.height = imageViewSize.width / image.size.width * image.size.height;
+
+        UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(0,
+                                                                              self.maxHeight,
+                                                                              imageViewSize.width,
+                                                                              imageViewSize.height)];
+        [imageView setImage:image];
+        [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
+        [imageView.layer setBorderWidth:0.5f];
+        [imageView setClipsToBounds:YES];
+        [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        [imageView setTag:index];
+        [self.scrollView addSubview:imageView];
+        self.maxHeight += imageViewSize.height;
     }];
+}
+
+- (void)addPhotoToBottomOfView:(PABLPhoto *)photo withIndex:(NSInteger)index {
+    [photo getImageWithSize:CGSizeMake(CGRectGetWidth(self.frame), CGRectGetHeight(self.frame)) WithCompletion:^(UIImage *image) {
+        CGSize imageViewSize = CGSizeZero;
+        imageViewSize.width = CGRectGetWidth(self.frame);
+        imageViewSize.height = imageViewSize.width / image.size.width * image.size.height;
+        
+        UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(0,
+                                                                              self.minHeight - imageViewSize.height,
+                                                                              imageViewSize.width,
+                                                                              imageViewSize.height)];
+        [imageView setImage:image];
+        [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
+        [imageView.layer setBorderWidth:0.5f];
+        [imageView setClipsToBounds:YES];
+        [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        [imageView setTag:index];
+        [self.scrollView addSubview:imageView];
+        self.minHeight -= imageViewSize.height;
+    }];
+}
+
+#pragma mark - UIScrollViewDelegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    NSInteger minIndex = NSIntegerMax;
+    NSInteger maxIndex = NSIntegerMin;
+    for (UIView *view in self.scrollView.subviews) {
+        if (view.tag > maxIndex) {
+            maxIndex = view.tag;
+        }
+        if (view.tag < minIndex) {
+            minIndex = view.tag;
+        }
+    }
+//    if (self.scrollView.contentOffset.y + CGRectGetHeight(self.scrollView.frame) > self.minHeight + (self.maxHeight - self.minHeight) * 0.7f) {
+//        for (UIView *view in self.scrollView.subviews) {
+//            if (view.tag == minIndex) {
+//                [view removeFromSuperview];
+//            }
+//            if (view.tag == minIndex + 1) {
+//                self.minHeight = CGRectGetMinY(view.frame);
+//            }
+//        }
+//        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
+//            PABLPhoto *photo = [self.delegate getPhotoWithIndex:maxIndex+1];
+//            if (photo != nil) {
+//                [self addPhotoToTopOfView:photo withIndex:maxIndex+1];
+//            }
+//        }
+//    } else if (self.scrollView.contentOffset.y < self.minHeight + (self.maxHeight - self.minHeight) * 0.3f) {
+//        for (UIView *view in self.scrollView.subviews) {
+//            if (view.tag == maxIndex) {
+//                [view removeFromSuperview];
+//            }
+//            if (view.tag == maxIndex - 1) {
+//                self.maxHeight = CGRectGetMaxY(view.frame);
+//            }
+//        }
+//        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
+//            PABLPhoto *photo = [self.delegate getPhotoWithIndex:minIndex-1];
+//            if (photo != nil) {
+//                [self addPhotoToBottomOfView:photo withIndex:minIndex-1];
+//            }
+//        }
+//    }
 }
 
 #pragma mark - touch action
@@ -108,7 +166,35 @@
     }
 }
 
+- (void) toggleChannelView {
+    CGRect channelListViewFrame = self.channelListView.frame;
+    if (CGRectGetMinX(self.channelListView.frame) < 0) {
+        channelListViewFrame.origin.x = 0;
+    } else {
+        channelListViewFrame.origin.x = -CHANNELLIST_WIDTH;
+    }
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.channelListView setFrame:channelListViewFrame];
+    }];
+}
+
 #pragma mark - generator
+
+- (UIView *)headerView {
+    if (_headerView == nil) {
+        _headerView = [[UIView alloc]init];
+        [_headerView setBackgroundColor:HEXCOLOR(0x5CD1E5FF)];
+    }
+    return _headerView;
+}
+
+- (UIView *)channelListView {
+    if (_channelListView == nil) {
+        _channelListView = [[UIView alloc]init];
+        [_channelListView setBackgroundColor:HEXCOLOR(0x00000099)];
+    }
+    return _channelListView;
+}
 
 - (UIScrollView *)scrollView {
     if (_scrollView == nil) {
@@ -116,6 +202,7 @@
         [_scrollView setShowsHorizontalScrollIndicator:NO];
         [_scrollView setShowsVerticalScrollIndicator:NO];
         [_scrollView setBackgroundColor:[UIColor whiteColor]];
+        [_scrollView setDelegate:self];
     }
     return _scrollView;
 }
