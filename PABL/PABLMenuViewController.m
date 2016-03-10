@@ -42,6 +42,7 @@
     [super viewWillAppear:animated];
     [self.pablMenuView setFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame))];
     [self.pablMenuView prepareToLoad];
+    self.pablMenuView.photoCount = self.photoArray.count;
     
     //일단 10개만
     //재활용하도록 바꾸면 다 그리게

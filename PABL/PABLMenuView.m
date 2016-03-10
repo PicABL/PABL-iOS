@@ -84,7 +84,11 @@
         [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
         [imageView.layer setBorderWidth:0.5f];
         [imageView setClipsToBounds:YES];
-        [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        if (imageViewSize.width > imageViewSize.height) {
+            [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        } else {
+            [imageView setContentMode:UIViewContentModeScaleToFill];
+        }
         [imageView setTag:index];
         [self.scrollView addSubview:imageView];
         self.maxHeight += imageViewSize.height;
@@ -105,7 +109,11 @@
         [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
         [imageView.layer setBorderWidth:0.5f];
         [imageView setClipsToBounds:YES];
-        [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        if (imageViewSize.width > imageViewSize.height) {
+            [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        } else {
+            [imageView setContentMode:UIViewContentModeScaleToFill];
+        }
         [imageView setTag:index];
         [self.scrollView addSubview:imageView];
         self.minHeight -= imageViewSize.height;
@@ -125,37 +133,37 @@
             minIndex = view.tag;
         }
     }
-//    if (self.scrollView.contentOffset.y + CGRectGetHeight(self.scrollView.frame) > self.minHeight + (self.maxHeight - self.minHeight) * 0.7f) {
-//        for (UIView *view in self.scrollView.subviews) {
-//            if (view.tag == minIndex) {
-//                [view removeFromSuperview];
-//            }
-//            if (view.tag == minIndex + 1) {
-//                self.minHeight = CGRectGetMinY(view.frame);
-//            }
-//        }
-//        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
-//            PABLPhoto *photo = [self.delegate getPhotoWithIndex:maxIndex+1];
-//            if (photo != nil) {
-//                [self addPhotoToTopOfView:photo withIndex:maxIndex+1];
-//            }
-//        }
-//    } else if (self.scrollView.contentOffset.y < self.minHeight + (self.maxHeight - self.minHeight) * 0.3f) {
-//        for (UIView *view in self.scrollView.subviews) {
-//            if (view.tag == maxIndex) {
-//                [view removeFromSuperview];
-//            }
-//            if (view.tag == maxIndex - 1) {
-//                self.maxHeight = CGRectGetMaxY(view.frame);
-//            }
-//        }
-//        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
-//            PABLPhoto *photo = [self.delegate getPhotoWithIndex:minIndex-1];
-//            if (photo != nil) {
-//                [self addPhotoToBottomOfView:photo withIndex:minIndex-1];
-//            }
-//        }
-//    }
+    if (self.scrollView.contentOffset.y + CGRectGetHeight(self.scrollView.frame) > self.minHeight + (self.maxHeight - self.minHeight) * 0.7f && maxIndex < self.photoCount) {
+        for (UIView *view in self.scrollView.subviews) {
+            if (view.tag == minIndex) {
+                [view removeFromSuperview];
+            }
+            if (view.tag == minIndex + 1) {
+                self.minHeight = CGRectGetMinY(view.frame);
+            }
+        }
+        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
+            PABLPhoto *photo = [self.delegate getPhotoWithIndex:maxIndex+1];
+            if (photo != nil) {
+                [self addPhotoToTopOfView:photo withIndex:maxIndex+1];
+            }
+        }
+    } else if (self.scrollView.contentOffset.y < self.minHeight + (self.maxHeight - self.minHeight) * 0.3f && minIndex > 0) {
+        for (UIView *view in self.scrollView.subviews) {
+            if (view.tag == maxIndex) {
+                [view removeFromSuperview];
+            }
+            if (view.tag == maxIndex - 1) {
+                self.maxHeight = CGRectGetMaxY(view.frame);
+            }
+        }
+        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
+            PABLPhoto *photo = [self.delegate getPhotoWithIndex:minIndex-1];
+            if (photo != nil) {
+                [self addPhotoToBottomOfView:photo withIndex:minIndex-1];
+            }
+        }
+    }
 }
 
 #pragma mark - touch action
@@ -191,7 +199,7 @@
 - (UIView *)channelListView {
     if (_channelListView == nil) {
         _channelListView = [[UIView alloc]init];
-        [_channelListView setBackgroundColor:HEXCOLOR(0x00000099)];
+        [_channelListView setBackgroundColor:HEXCOLOR(0x000000CC)];
     }
     return _channelListView;
 }

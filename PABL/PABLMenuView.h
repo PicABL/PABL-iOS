@@ -19,6 +19,7 @@
 @interface PABLMenuView : UIView
 
 @property (nonatomic, assign) id<PABLMenuViewDelegate> delegate;
+@property (nonatomic, assign) NSInteger photoCount;
 
 - (void)prepareToLoad;
 - (void)addPhotoToTopOfView:(PABLPhoto *)photo withIndex:(NSInteger)index;
