@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CD1942B81C6775E700A8342D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD1942B71C6775E700A8342D /* CoreLocation.framework */; };
+		CD47853C1C91D72B0048C9AD /* PABLPhotoView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD47853B1C91D72B0048C9AD /* PABLPhotoView.m */; };
 		CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7335231C7238880086A2C0 /* PhotoManager.m */; };
 		CD7D6D3B1C76339A00013AF5 /* PABLThumbnailView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7D6D3A1C76339A00013AF5 /* PABLThumbnailView.m */; };
 		CD7F8C7C1C78884700970937 /* PABLPointAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7F8C7B1C78884700970937 /* PABLPointAnnotation.m */; };
@@ -45,6 +46,8 @@
 
 /* Begin PBXFileReference section */
 		CD1942B71C6775E700A8342D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		CD47853A1C91D72B0048C9AD /* PABLPhotoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLPhotoView.h; sourceTree = "<group>"; };
+		CD47853B1C91D72B0048C9AD /* PABLPhotoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLPhotoView.m; sourceTree = "<group>"; };
 		CD7335221C7238880086A2C0 /* PhotoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoManager.h; sourceTree = "<group>"; };
 		CD7335231C7238880086A2C0 /* PhotoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoManager.m; sourceTree = "<group>"; };
 		CD7D6D391C76339A00013AF5 /* PABLThumbnailView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLThumbnailView.h; sourceTree = "<group>"; };
@@ -114,6 +117,8 @@
 				CD7D6D3A1C76339A00013AF5 /* PABLThumbnailView.m */,
 				CD93229B1C8B1EFD00EFF2BF /* PABLDetailScrollView.h */,
 				CD93229C1C8B1EFD00EFF2BF /* PABLDetailScrollView.m */,
+				CD47853A1C91D72B0048C9AD /* PABLPhotoView.h */,
+				CD47853B1C91D72B0048C9AD /* PABLPhotoView.m */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -340,6 +345,7 @@
 			files = (
 				CDC2B1C61C708E3800CB5D6B /* PABLMenuView.m in Sources */,
 				CD7D6D3B1C76339A00013AF5 /* PABLThumbnailView.m in Sources */,
+				CD47853C1C91D72B0048C9AD /* PABLPhotoView.m in Sources */,
 				CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */,
 				CDB69BA21C6982DB006CCE8B /* Common.m in Sources */,
 				CDD547081C66367D00BAFCD8 /* ViewController.m in Sources */,

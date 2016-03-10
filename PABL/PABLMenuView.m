@@ -7,14 +7,15 @@
 //
 
 #import "PABLMenuView.h"
+#import "PABLPhotoView.h"
 #import "Common.h"
 
 #define DEFAULT_SIZE CGSizeMake(100, 100)
 #define IMAGE_PADDING 3.0f
 #define TITLEVIEW_HEIGHT 60.0f
-#define CHANNELLIST_WIDTH 200.0f
+#define CHANNELLIST_WIDTH 220.0f
 
-@interface PABLMenuView () <UIGestureRecognizerDelegate, UIScrollViewDelegate>
+@interface PABLMenuView () <UIGestureRecognizerDelegate, UIScrollViewDelegate, PABLPhotoViewDelegate>
 
 @property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) UIView *channelListView;
@@ -75,22 +76,15 @@
         CGSize imageViewSize = CGSizeZero;
         imageViewSize.width = CGRectGetWidth(self.frame);
         imageViewSize.height = imageViewSize.width / image.size.width * image.size.height;
-
-        UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(0,
-                                                                              self.maxHeight,
-                                                                              imageViewSize.width,
-                                                                              imageViewSize.height)];
-        [imageView setImage:image];
-        [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
-        [imageView.layer setBorderWidth:0.5f];
-        [imageView setClipsToBounds:YES];
-        if (imageViewSize.width > imageViewSize.height) {
-            [imageView setContentMode:UIViewContentModeScaleAspectFit];
-        } else {
-            [imageView setContentMode:UIViewContentModeScaleToFill];
-        }
-        [imageView setTag:index];
-        [self.scrollView addSubview:imageView];
+        PABLPhotoView *pablPhotoView = [[PABLPhotoView alloc]init];
+        [pablPhotoView setFrame:CGRectMake(0,
+                                           self.maxHeight,
+                                           imageViewSize.width,
+                                           imageViewSize.height)];
+        [pablPhotoView setPhoto:image];
+        [pablPhotoView setIndex:index];
+        [pablPhotoView setDelegate:self];
+        [self.scrollView addSubview:pablPhotoView];
         self.maxHeight += imageViewSize.height;
     }];
 }
@@ -100,24 +94,23 @@
         CGSize imageViewSize = CGSizeZero;
         imageViewSize.width = CGRectGetWidth(self.frame);
         imageViewSize.height = imageViewSize.width / image.size.width * image.size.height;
-        
-        UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(0,
-                                                                              self.minHeight - imageViewSize.height,
-                                                                              imageViewSize.width,
-                                                                              imageViewSize.height)];
-        [imageView setImage:image];
-        [imageView.layer setBorderColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.3f].CGColor];
-        [imageView.layer setBorderWidth:0.5f];
-        [imageView setClipsToBounds:YES];
-        if (imageViewSize.width > imageViewSize.height) {
-            [imageView setContentMode:UIViewContentModeScaleAspectFit];
-        } else {
-            [imageView setContentMode:UIViewContentModeScaleToFill];
-        }
-        [imageView setTag:index];
-        [self.scrollView addSubview:imageView];
+        PABLPhotoView *pablPhotoView = [[PABLPhotoView alloc]init];
+        [pablPhotoView setFrame:CGRectMake(0,
+                                           self.minHeight - imageViewSize.height,
+                                           imageViewSize.width,
+                                           imageViewSize.height)];
+        [pablPhotoView setPhoto:image];
+        [pablPhotoView setIndex:index];
+        [pablPhotoView setDelegate:self];
+        [self.scrollView addSubview:pablPhotoView];
         self.minHeight -= imageViewSize.height;
     }];
+}
+
+#pragma mark - PABLPhotoViewDelegate
+
+- (void)PABLPhotoViewDidTouched:(NSInteger)index {
+    NSLog(@"%ld",index);
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -125,20 +118,20 @@
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     NSInteger minIndex = NSIntegerMax;
     NSInteger maxIndex = NSIntegerMin;
-    for (UIView *view in self.scrollView.subviews) {
-        if (view.tag > maxIndex) {
-            maxIndex = view.tag;
+    for (PABLPhotoView *view in self.scrollView.subviews) {
+        if (view.index > maxIndex) {
+            maxIndex = view.index;
         }
-        if (view.tag < minIndex) {
-            minIndex = view.tag;
+        if (view.index < minIndex) {
+            minIndex = view.index;
         }
     }
     if (self.scrollView.contentOffset.y + CGRectGetHeight(self.scrollView.frame) > self.minHeight + (self.maxHeight - self.minHeight) * 0.7f && maxIndex < self.photoCount) {
-        for (UIView *view in self.scrollView.subviews) {
-            if (view.tag == minIndex) {
+        for (PABLPhotoView *view in self.scrollView.subviews) {
+            if (view.index == minIndex) {
                 [view removeFromSuperview];
             }
-            if (view.tag == minIndex + 1) {
+            if (view.index == minIndex + 1) {
                 self.minHeight = CGRectGetMinY(view.frame);
             }
         }
@@ -149,11 +142,11 @@
             }
         }
     } else if (self.scrollView.contentOffset.y < self.minHeight + (self.maxHeight - self.minHeight) * 0.3f && minIndex > 0) {
-        for (UIView *view in self.scrollView.subviews) {
-            if (view.tag == maxIndex) {
+        for (PABLPhotoView *view in self.scrollView.subviews) {
+            if (view.index == maxIndex) {
                 [view removeFromSuperview];
             }
-            if (view.tag == maxIndex - 1) {
+            if (view.index == maxIndex - 1) {
                 self.maxHeight = CGRectGetMaxY(view.frame);
             }
         }
