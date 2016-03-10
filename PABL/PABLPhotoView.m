@@ -8,9 +8,10 @@
 
 #import "PABLPhotoView.h"
 
-@interface PABLPhotoView () <UIGestureRecognizerDelegate>
+@interface PABLPhotoView () <UIGestureRecognizerDelegate, MKMapViewDelegate>
 
 @property (nonatomic, strong) UIImageView *imageView;
+@property (nonatomic, strong) MKMapView *mapView;
 
 @end
 
@@ -27,8 +28,31 @@
 
 - (void)didTappedPhotoView {
     if (self.delegate && [self.delegate respondsToSelector:@selector(PABLPhotoViewDidTouched:)]) {
-        [self.delegate PABLPhotoViewDidTouched:self.index];
+        [self.delegate PABLPhotoViewDidTouched:self];
     }
+    if (self.isMapViewOpened == YES) {
+        [self closeMapView];
+    } else {
+        [self openMapView];
+    }
+    self.isMapViewOpened = self.isMapViewOpened ? NO : YES;
+}
+
+- (void)openMapView {
+    [self addSubview:self.mapView];
+    [self.mapView setFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), CGRectGetWidth(self.imageView.frame), 0)];
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.mapView setFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), CGRectGetWidth(self.imageView.frame), MAPVIEW_HEIGHT)];
+    }];
+}
+
+- (void)closeMapView {
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.mapView setFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), CGRectGetWidth(self.imageView.frame), 0)];
+    } completion:^(BOOL finished) {
+        [self.mapView removeFromSuperview];
+        self.mapView = nil;
+    }];
 }
 
 - (void)setPhoto:(UIImage *)photo {
@@ -53,6 +77,15 @@
         [_imageView setClipsToBounds:YES];
     }
     return _imageView;
+}
+
+- (MKMapView *)mapView {
+    if (_mapView == nil) {
+        _mapView = [[MKMapView alloc]init];
+        [_mapView setDelegate:self];
+        [_mapView setRotateEnabled:NO];
+    }
+    return _mapView;
 }
 
 @end

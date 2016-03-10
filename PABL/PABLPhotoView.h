@@ -7,17 +7,24 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
+
+#define MAPVIEW_HEIGHT 250.0f
 
 @protocol PABLPhotoViewDelegate <NSObject>
 
-- (void)PABLPhotoViewDidTouched:(NSInteger)index;
+- (void)PABLPhotoViewDidTouched:(UIView *)view;
 
 @end
 
 @interface PABLPhotoView : UIView
 
 @property (nonatomic, assign) NSInteger index;
+@property (nonatomic, assign) BOOL isMapViewOpened;
 @property (nonatomic, strong) UIImage *photo;
 @property (nonatomic, assign) id<PABLPhotoViewDelegate> delegate;
+
+- (void)openMapView;
+- (void)closeMapView;
 
 @end

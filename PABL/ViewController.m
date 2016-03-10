@@ -74,7 +74,7 @@
     
     [self.menuSpreadButton.layer setCornerRadius:MENU_BUTTON_SIZE/2];
     
-    [NSTimer scheduledTimerWithTimeInterval:2.0f target:self selector:@selector(dismissWelcomeView) userInfo:nil repeats:NO];
+    [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(dismissWelcomeView) userInfo:nil repeats:NO];
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(menuSpreadButtonTouched)];
     [self.menuSpreadButton addGestureRecognizer:tapGesture];
 }
