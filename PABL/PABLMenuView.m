@@ -162,6 +162,9 @@
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if (self.maxHeight == 0 ) {
+        return;
+    }
     if (CGRectGetMinX(self.channelListView.frame) == 0) {
         [self toggleChannelView];
     }
@@ -211,6 +214,11 @@
 #pragma mark - touch action
 
 - (void)touchedCloseButton {
+    for (PABLPhotoView *view in self.scrollView.subviews) {
+        if (view.isMapViewOpened == YES) {
+            [view closeMapView];
+        }
+    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(didTouchedCloseButton)] == YES) {
         [self.delegate didTouchedCloseButton];
     }

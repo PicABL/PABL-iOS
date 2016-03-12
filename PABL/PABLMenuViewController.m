@@ -44,8 +44,6 @@
     [self.pablMenuView prepareToLoad];
     self.pablMenuView.photoCount = self.photoArray.count;
     
-    //일단 10개만
-    //재활용하도록 바꾸면 다 그리게
     NSInteger num = 0;
     for (PABLPhoto *photo in self.photoArray) {
         [self.pablMenuView addPhotoToTopOfView:photo withIndex:num];
