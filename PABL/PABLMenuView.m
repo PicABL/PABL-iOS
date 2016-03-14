@@ -7,7 +7,6 @@
 //
 
 #import "PABLMenuView.h"
-#import "PABLPhotoView.h"
 #import "Common.h"
 
 #define DEFAULT_SIZE CGSizeMake(100, 100)
@@ -113,51 +112,7 @@
     if (CGRectGetMinX(self.channelListView.frame) == 0) {
         [self toggleChannelView];
     }
-    PABLPhotoView *pablPhotoView = (PABLPhotoView *)view;
-    if (pablPhotoView.isMapViewOpened == YES) {
-        [self closeMapViewWithPABLPhotoView:pablPhotoView];
-    } else {
-        [self openMapViewWithPABLPhotoView:pablPhotoView];
-    }
 }
-
-- (void)openMapViewWithPABLPhotoView:(PABLPhotoView *)pablPhotoView {
-    [UIView animateWithDuration:0.3f animations:^{
-        for (PABLPhotoView *view in self.scrollView.subviews) {
-            if (view.index != pablPhotoView.index && view.isMapViewOpened == YES) {
-                [self closeMapViewWithPABLPhotoView:view];
-                [view closeMapView];
-                view.isMapViewOpened = NO;
-            }
-        }
-    }];
-    [UIView animateWithDuration:0.3f animations:^{
-        for (PABLPhotoView *view in self.scrollView.subviews) {
-            if (view.index > pablPhotoView.index) {
-                CGRect viewFrame = view.frame;
-                viewFrame.origin.y += MAPVIEW_HEIGHT;
-                [view setFrame:viewFrame];
-            }
-        }
-    }];
-    CGSize contentSize = self.scrollView.contentSize;
-    contentSize.height += MAPVIEW_HEIGHT;
-    [self.scrollView setContentSize:contentSize];
-    [self.scrollView setContentOffset:CGPointMake(0, CGRectGetMinY(pablPhotoView.frame)) animated:YES];
-}
-- (void)closeMapViewWithPABLPhotoView:(PABLPhotoView *)pablPhotoView {
-    [UIView animateWithDuration:0.3f animations:^{
-        for (PABLPhotoView *view in self.scrollView.subviews) {
-            if (view.index > pablPhotoView.index) {
-                CGRect viewFrame = view.frame;
-                viewFrame.origin.y -= MAPVIEW_HEIGHT;
-                [view setFrame:viewFrame];
-            }
-        }
-    }];
-    CGSize contentSize = self.scrollView.contentSize;
-    contentSize.height -= MAPVIEW_HEIGHT;
-    [self.scrollView setContentSize:contentSize];}
 
 #pragma mark - UIScrollViewDelegate
 
@@ -214,11 +169,6 @@
 #pragma mark - touch action
 
 - (void)touchedCloseButton {
-    for (PABLPhotoView *view in self.scrollView.subviews) {
-        if (view.isMapViewOpened == YES) {
-            [view closeMapView];
-        }
-    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(didTouchedCloseButton)] == YES) {
         [self.delegate didTouchedCloseButton];
     }

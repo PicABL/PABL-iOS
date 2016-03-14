@@ -8,9 +8,10 @@
 
 #import "PABLMenuViewController.h"
 
-@interface PABLMenuViewController () <PABLMenuViewDelegate>
+@interface PABLMenuViewController () <PABLMenuViewDelegate, MKMapViewDelegate>
 
 @property (nonatomic, strong) PABLMenuView *pablMenuView;
+@property (nonatomic, strong) MKMapView *mapView;
 
 @end
 
@@ -57,6 +58,7 @@
     }];
 }
 
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 }
@@ -83,5 +85,13 @@
     return _pablMenuView;
 }
 
+- (MKMapView *)mapView {
+    if (_mapView == nil) {
+        _mapView = [[MKMapView alloc]init];
+        [_mapView setDelegate:self];
+        [_mapView setRotateEnabled:NO];
+    }
+    return _mapView;
+}
 
 @end

@@ -24,7 +24,4 @@
 @property (nonatomic, strong) UIImage *photo;
 @property (nonatomic, assign) id<PABLPhotoViewDelegate> delegate;
 
-- (void)openMapView;
-- (void)closeMapView;
-
 @end

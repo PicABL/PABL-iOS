@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "PABLMenuView.h"
+#import "PABLPhotoView.h"
 
 @protocol PABLMenuViewControllerDelegate <NSObject>
 
