@@ -14,6 +14,7 @@
 
 - (void)didTouchedCloseButton;
 - (PABLPhoto *)getPhotoWithIndex:(NSInteger)index;
+- (void)didTouchedPhotoViewWithPhotoView:(PABLPhotoView *)photoView;
 
 @end
 

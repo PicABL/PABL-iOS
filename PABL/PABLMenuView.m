@@ -112,6 +112,10 @@
     if (CGRectGetMinX(self.channelListView.frame) == 0) {
         [self toggleChannelView];
     }
+    [self.scrollView setContentOffset:CGPointMake(0, view.frame.origin.y) animated:YES];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didTouchedPhotoViewWithPhotoView:)] == YES) {
+        [self.delegate didTouchedPhotoViewWithPhotoView:(PABLPhotoView *)view];
+    }
 }
 
 #pragma mark - UIScrollViewDelegate

@@ -9,8 +9,6 @@
 #import <UIKit/UIKit.h>
 #import <MapKit/MapKit.h>
 
-#define MAPVIEW_HEIGHT 250.0f
-
 @protocol PABLPhotoViewDelegate <NSObject>
 
 - (void)PABLPhotoViewDidTouched:(UIView *)view;

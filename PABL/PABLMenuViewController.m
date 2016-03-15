@@ -7,10 +7,14 @@
 //
 
 #import "PABLMenuViewController.h"
+#import "Common.h"
 
-@interface PABLMenuViewController () <PABLMenuViewDelegate, MKMapViewDelegate>
+#define MAPVIEW_HEIGHT 320.0f
+
+@interface PABLMenuViewController () <PABLMenuViewDelegate, MKMapViewDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) PABLMenuView *pablMenuView;
+@property (nonatomic, strong) UIView *dimmView;
 @property (nonatomic, strong) MKMapView *mapView;
 
 @end
@@ -22,6 +26,8 @@
         [self.view setFrame:viewController.view.frame];
         [self.view addSubview:self.pablMenuView];
         [self.view setBackgroundColor:[UIColor whiteColor]];
+        [self.view addSubview:self.dimmView];
+        [self.view addSubview:self.mapView];
     }
     return self;
 }
@@ -56,6 +62,12 @@
     [UIView animateWithDuration:0.3f animations:^{
         [self.pablMenuView setAlpha:1.0f];
     }];
+    
+    [self.dimmView setFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame))];
+    [self.dimmView setAlpha:0.0f];
+    [self.dimmView setHidden:YES];
+    
+    [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
 }
 
 
@@ -63,7 +75,26 @@
     [super viewDidAppear:animated];
 }
 
+#pragma mark - Touch Action
+
+- (void)didTouchedDimmView {
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.dimmView setAlpha:0.0f];
+        [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
+    } completion:^(BOOL finished) {
+        [self.dimmView setHidden:YES];
+    }];
+}
+
 #pragma mark - PABLMenuViewDelegate
+
+- (void)didTouchedPhotoViewWithPhotoView:(PABLPhotoView *)photoView {
+    [self.dimmView setHidden:NO];
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.dimmView setAlpha:1.0f];
+        [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame) - MAPVIEW_HEIGHT, CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
+    }];
+}
 
 - (void)didTouchedCloseButton {
     [self closeMenuViewController];
@@ -83,6 +114,16 @@
         [_pablMenuView setDelegate:self];
     }
     return _pablMenuView;
+}
+
+- (UIView *)dimmView {
+    if (_dimmView == nil) {
+        _dimmView = [[UIView alloc]init];
+        [_dimmView setBackgroundColor:HEXCOLOR(0x000000AA)];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didTouchedDimmView)];
+        [_dimmView addGestureRecognizer:tapGesture];
+    }
+    return _dimmView;
 }
 
 - (MKMapView *)mapView {
