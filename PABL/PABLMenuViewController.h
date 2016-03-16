@@ -20,6 +20,7 @@
 
 @property (nonatomic, strong) id<PABLMenuViewControllerDelegate> delegate;
 @property (nonatomic, strong) NSArray *photoArray;
+@property (nonatomic, assign) MKCoordinateRegion mapRegion;
 
 - (instancetype)initWithViewController:(UIViewController *)viewController;
 - (void)closeMenuViewController;

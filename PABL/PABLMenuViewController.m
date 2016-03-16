@@ -68,6 +68,18 @@
     [self.dimmView setHidden:YES];
     
     [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
+    
+    UIView *mapPointView1 = [[UIView alloc]initWithFrame:CGRectMake(CGRectGetWidth(self.mapView.frame)/2 - 0.5, CGRectGetHeight(self.mapView.frame)/2 - 15, 1, 30)];
+    UIView *mapPointView2 = [[UIView alloc]initWithFrame:CGRectMake(CGRectGetWidth(self.mapView.frame)/2 - 15, CGRectGetHeight(self.mapView.frame)/2 - 0.5, 30, 1)];
+    [mapPointView1 setBackgroundColor:HEXCOLOR(0x00000088)];
+    [mapPointView2 setBackgroundColor:HEXCOLOR(0x00000088)];
+    [mapPointView1.layer setCornerRadius:1.0f];
+    [mapPointView2.layer setCornerRadius:1.0f];
+    [mapPointView1 setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin];
+    [mapPointView2 setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin];
+    [self.mapView addSubview:mapPointView1];
+    [self.mapView addSubview:mapPointView2];
+    [self.mapView setRegion:self.mapRegion];
 }
 
 

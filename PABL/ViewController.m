@@ -401,6 +401,7 @@
         }
     }
     [self.menuViewController setPhotoArray:photoArray];
+    [self.menuViewController setMapRegion:self.mapView.region];
     
     CGPoint menuCenter = CGPointMake(CGRectGetWidth(self.mapView.frame)/2, CGRectGetHeight(self.mapView.frame)/2);
     [self.animationView setFrame:CGRectMake(menuCenter.x, menuCenter.y - 1, 0, 2)];
