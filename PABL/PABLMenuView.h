@@ -10,6 +10,8 @@
 #import "PABLPhotoView.h"
 #import "PABLPhoto.h"
 
+#define TITLEVIEW_HEIGHT 60.0f
+
 @protocol PABLMenuViewDelegate <NSObject>
 
 - (void)didTouchedCloseButton;

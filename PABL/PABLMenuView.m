@@ -11,7 +11,6 @@
 
 #define DEFAULT_SIZE CGSizeMake(100, 100)
 #define IMAGE_PADDING 3.0f
-#define TITLEVIEW_HEIGHT 60.0f
 #define CHANNELLIST_WIDTH 220.0f
 
 @interface PABLMenuView () <UIGestureRecognizerDelegate, UIScrollViewDelegate, PABLPhotoViewDelegate>

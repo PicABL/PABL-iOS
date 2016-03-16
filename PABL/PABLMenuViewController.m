@@ -77,12 +77,28 @@
 
 #pragma mark - Touch Action
 
-- (void)didTouchedDimmView {
+- (void)didActionToCloseDimmView {
     [UIView animateWithDuration:0.3f animations:^{
         [self.dimmView setAlpha:0.0f];
         [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
     } completion:^(BOOL finished) {
         [self.dimmView setHidden:YES];
+    }];
+}
+
+- (void)didSwipeUpDimmView {
+    [UIView animateWithDuration:0.3f animations:^{
+        [self.mapView setFrame:CGRectMake(0, TITLEVIEW_HEIGHT + 10.0f, CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.3f animations:^{
+            [self.dimmView setAlpha:0.0f];
+            [self.mapView setFrame:CGRectMake(0, TITLEVIEW_HEIGHT + MAPVIEW_HEIGHT/2, CGRectGetWidth(self.view.frame), 0)];
+            [self.mapView setAlpha:0.5f];
+        } completion:^(BOOL finished) {
+            [self.dimmView setHidden:YES];
+            [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
+            [self.mapView setAlpha:1.0f];
+        }];
     }];
 }
 
@@ -120,8 +136,14 @@
     if (_dimmView == nil) {
         _dimmView = [[UIView alloc]init];
         [_dimmView setBackgroundColor:HEXCOLOR(0x000000AA)];
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didTouchedDimmView)];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didActionToCloseDimmView)];
+        UISwipeGestureRecognizer *swipeUpGesture = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(didSwipeUpDimmView)];
+        [swipeUpGesture setDirection:UISwipeGestureRecognizerDirectionUp];
+        UISwipeGestureRecognizer *swipeDownGesture = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(didActionToCloseDimmView)];
+        [swipeDownGesture setDirection:UISwipeGestureRecognizerDirectionDown];
         [_dimmView addGestureRecognizer:tapGesture];
+        [_dimmView addGestureRecognizer:swipeUpGesture];
+        [_dimmView addGestureRecognizer:swipeDownGesture];
     }
     return _dimmView;
 }
