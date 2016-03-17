@@ -13,6 +13,7 @@
 
 + (PhotoManager *)sharedInstance;
 - (void)getAllPhotosFromAllAlbums;
+- (void)reloadPhotoAsset;
 
 @property (nonatomic, strong) NSMutableArray *photoArray;
 

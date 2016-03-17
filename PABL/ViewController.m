@@ -430,6 +430,9 @@
 - (void)PABLMenuViewControllerDidTouchCloseButton {
     CGPoint menuCenter = CGPointMake(CGRectGetWidth(self.mapView.frame)/2, CGRectGetHeight(self.mapView.frame)/2);
     CGRect animationViewFrame = self.animationView.frame;
+    CGPoint leftCorner = CGPointMake(self.mapView.region.center.longitude - self.mapView.region.span.longitudeDelta/2, self.mapView.region.center.latitude - self.mapView.region.span.latitudeDelta/2);
+    [self refreshPhotoViewOnMapWithLeftCorner:leftCorner withSpan:self.mapView.region.span];
+    
     animationViewFrame.origin.y = menuCenter.y - 1;
     animationViewFrame.size.height = 2;
     [UIView animateWithDuration:0.3f animations:^{

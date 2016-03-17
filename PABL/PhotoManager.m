@@ -24,6 +24,10 @@ static PhotoManager *instance = nil;
     return instance;
 }
 
+- (void)reloadPhotoAsset {
+    [self.photoArray removeAllObjects];
+    [self getAllPhotosFromAllAlbums];
+}
 
 - (void)getAllPhotosFromAllAlbums {
     NSMutableArray *albumArray = [NSMutableArray array];

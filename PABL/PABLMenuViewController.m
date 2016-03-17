@@ -103,12 +103,14 @@
 
 - (void)didSwipeUpDimmView {
     PABLPhoto *pablPhoto = (PABLPhoto *)self.photoArray[self.selectedPhotoView.index];
+    CLLocation *newLocation = [[CLLocation alloc]initWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude];
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
         PHAssetChangeRequest *request = [PHAssetChangeRequest changeRequestForAsset:pablPhoto.photoData];
-        request.location =  [[CLLocation alloc]initWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude];
+        request.location =  newLocation;
     } completionHandler:^(BOOL success, NSError * _Nullable error) {
         if (success == YES) {
             [self.photoArray removeObject:pablPhoto];
+            [[PhotoManager sharedInstance] reloadPhotoAsset];
         }
     }];
     
