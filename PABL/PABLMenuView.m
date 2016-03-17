@@ -105,6 +105,44 @@
     }];
 }
 
+- (void)removePhotoWithIndex:(NSInteger)index {
+    NSInteger maxIndex = 0;
+    CGFloat viewHeight = 0.0f;
+    for (PABLPhotoView *view in self.scrollView.subviews) {
+        if (view.index > index) {
+            view.index -= 1;
+        } else if (view.index == index) {
+            view.index = -1;
+            viewHeight = view.frame.size.height;
+        }
+        if (view.index == index + 1) {
+        }
+        if (maxIndex < view.index) {
+            maxIndex = view.index;
+        }
+    }
+    for (PABLPhotoView *view in self.scrollView.subviews) {
+        if (view.index == -1) {
+            [view removeFromSuperview];
+        }
+        if (view.index >= index) {
+            CGRect viewFrame = view.frame;
+            viewFrame.origin.y -= viewHeight;
+            [UIView animateWithDuration:0.3f animations:^{
+                [view setFrame:viewFrame];
+            }];
+        }
+    }
+    if (maxIndex + 1 < self.photoCount) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
+            PABLPhoto *photo = [self.delegate getPhotoWithIndex:maxIndex + 1];
+            if (photo != nil) {
+                [self addPhotoToTopOfView:photo withIndex:maxIndex + 1];
+            }
+        }
+    }
+}
+
 #pragma mark - PABLPhotoViewDelegate
 
 - (void)PABLPhotoViewDidTouched:(UIView *)view {

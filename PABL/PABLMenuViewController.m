@@ -8,6 +8,7 @@
 
 #import "PABLMenuViewController.h"
 #import "Common.h"
+#import "PhotoManager.h"
 
 #define MAPVIEW_HEIGHT 320.0f
 
@@ -16,6 +17,7 @@
 @property (nonatomic, strong) PABLMenuView *pablMenuView;
 @property (nonatomic, strong) UIView *dimmView;
 @property (nonatomic, strong) MKMapView *mapView;
+@property (nonatomic, strong) PABLPhotoView *selectedPhotoView;
 
 @end
 
@@ -80,6 +82,7 @@
     [self.mapView addSubview:mapPointView1];
     [self.mapView addSubview:mapPointView2];
     [self.mapView setRegion:self.mapRegion];
+    self.selectedPhotoView = nil;
 }
 
 
@@ -99,17 +102,31 @@
 }
 
 - (void)didSwipeUpDimmView {
+    PABLPhoto *pablPhoto = (PABLPhoto *)self.photoArray[self.selectedPhotoView.index];
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        PHAssetChangeRequest *request = [PHAssetChangeRequest changeRequestForAsset:pablPhoto.photoData];
+        request.location =  [[CLLocation alloc]initWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude];
+    } completionHandler:^(BOOL success, NSError * _Nullable error) {
+        if (success == YES) {
+            [self.photoArray removeObject:pablPhoto];
+        }
+    }];
+    
     [UIView animateWithDuration:0.3f animations:^{
         [self.mapView setFrame:CGRectMake(0, TITLEVIEW_HEIGHT + 10.0f, CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
     } completion:^(BOOL finished) {
-        [UIView animateWithDuration:0.3f animations:^{
+        [UIView animateWithDuration:0.15f animations:^{
             [self.dimmView setAlpha:0.0f];
-            [self.mapView setFrame:CGRectMake(0, TITLEVIEW_HEIGHT + MAPVIEW_HEIGHT/2, CGRectGetWidth(self.view.frame), 0)];
-            [self.mapView setAlpha:0.5f];
+            [self.mapView setFrame:CGRectMake(0, TITLEVIEW_HEIGHT + MAPVIEW_HEIGHT/2, CGRectGetWidth(self.view.frame), 2)];
         } completion:^(BOOL finished) {
-            [self.dimmView setHidden:YES];
-            [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
-            [self.mapView setAlpha:1.0f];
+            [UIView animateWithDuration:0.15f animations:^{
+                [self.mapView setFrame:CGRectMake(CGRectGetWidth(self.view.frame)/2 - 1, TITLEVIEW_HEIGHT + MAPVIEW_HEIGHT/2, 10, 2)];
+            } completion:^(BOOL finished) {
+                [self.dimmView setHidden:YES];
+                [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame), CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
+                [self.pablMenuView removePhotoWithIndex:self.selectedPhotoView.index];
+                self.selectedPhotoView = nil;
+            }];
         }];
     }];
 }
@@ -122,6 +139,7 @@
         [self.dimmView setAlpha:1.0f];
         [self.mapView setFrame:CGRectMake(0, CGRectGetHeight(self.view.frame) - MAPVIEW_HEIGHT, CGRectGetWidth(self.view.frame), MAPVIEW_HEIGHT)];
     }];
+    self.selectedPhotoView = photoView;
 }
 
 - (void)didTouchedCloseButton {

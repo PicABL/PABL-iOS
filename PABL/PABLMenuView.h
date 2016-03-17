@@ -27,5 +27,7 @@
 
 - (void)prepareToLoad;
 - (void)addPhotoToTopOfView:(PABLPhoto *)photo withIndex:(NSInteger)index;
+- (void)addPhotoToBottomOfView:(PABLPhoto *)photo withIndex:(NSInteger)index;
+- (void)removePhotoWithIndex:(NSInteger)index;
 
 @end
