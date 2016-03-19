@@ -133,6 +133,7 @@
             }];
         }
     }
+    self.maxHeight -= viewHeight;
     if (maxIndex + 1 < self.photoCount) {
         if (self.delegate && [self.delegate respondsToSelector:@selector(getPhotoWithIndex:)] == YES) {
             PABLPhoto *photo = [self.delegate getPhotoWithIndex:maxIndex + 1];
