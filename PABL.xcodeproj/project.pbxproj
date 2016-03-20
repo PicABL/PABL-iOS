@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B410DCE83F85BC39507B4D13 /* libPods-PABL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED97CE91AA20F7BB3AA8DFFE /* libPods-PABL.a */; };
 		CD1942B81C6775E700A8342D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD1942B71C6775E700A8342D /* CoreLocation.framework */; };
 		CD47853C1C91D72B0048C9AD /* PABLPhotoView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD47853B1C91D72B0048C9AD /* PABLPhotoView.m */; };
 		CD7335241C7238880086A2C0 /* PhotoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7335231C7238880086A2C0 /* PhotoManager.m */; };
@@ -45,6 +46,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		308398420D766224CC4ECCDB /* Pods-PABL.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PABL.release.xcconfig"; path = "Pods/Target Support Files/Pods-PABL/Pods-PABL.release.xcconfig"; sourceTree = "<group>"; };
+		C38FCD9E23274F9453403D2B /* Pods-PABL.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PABL.debug.xcconfig"; path = "Pods/Target Support Files/Pods-PABL/Pods-PABL.debug.xcconfig"; sourceTree = "<group>"; };
 		CD1942B71C6775E700A8342D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		CD47853A1C91D72B0048C9AD /* PABLPhotoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLPhotoView.h; sourceTree = "<group>"; };
 		CD47853B1C91D72B0048C9AD /* PABLPhotoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLPhotoView.m; sourceTree = "<group>"; };
@@ -80,6 +83,7 @@
 		CDD547271C66367D00BAFCD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CDFC15F91C737FD900E505BD /* PABLPhoto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PABLPhoto.h; sourceTree = "<group>"; };
 		CDFC15FA1C737FD900E505BD /* PABLPhoto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PABLPhoto.m; sourceTree = "<group>"; };
+		ED97CE91AA20F7BB3AA8DFFE /* libPods-PABL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PABL.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +92,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CD1942B81C6775E700A8342D /* CoreLocation.framework in Frameworks */,
+				B410DCE83F85BC39507B4D13 /* libPods-PABL.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,6 +113,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		60E42EDE294E2B74290DF810 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				C38FCD9E23274F9453403D2B /* Pods-PABL.debug.xcconfig */,
+				308398420D766224CC4ECCDB /* Pods-PABL.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		CD1942B91C677EEC00A8342D /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -140,6 +154,8 @@
 				CDD547191C66367D00BAFCD8 /* PABLTests */,
 				CDD547241C66367D00BAFCD8 /* PABLUITests */,
 				CDD546FE1C66367D00BAFCD8 /* Products */,
+				60E42EDE294E2B74290DF810 /* Pods */,
+				E35045D95EA713BD7EFD0A44 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -213,6 +229,14 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
+		E35045D95EA713BD7EFD0A44 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ED97CE91AA20F7BB3AA8DFFE /* libPods-PABL.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -220,9 +244,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = CDD5472A1C66367D00BAFCD8 /* Build configuration list for PBXNativeTarget "PABL" */;
 			buildPhases = (
+				5ACA51A65B4FA6967E54AE9D /* Check Pods Manifest.lock */,
 				CDD546F91C66367D00BAFCD8 /* Sources */,
 				CDD546FA1C66367D00BAFCD8 /* Frameworks */,
 				CDD546FB1C66367D00BAFCD8 /* Resources */,
+				4695262014FDABB20E845DC4 /* Embed Pods Frameworks */,
+				48C8274573CCAD539D4AD16A /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -337,6 +364,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4695262014FDABB20E845DC4 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-PABL/Pods-PABL-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		48C8274573CCAD539D4AD16A /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-PABL/Pods-PABL-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5ACA51A65B4FA6967E54AE9D /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CDD546F91C66367D00BAFCD8 /* Sources */ = {
@@ -493,6 +568,7 @@
 		};
 		CDD5472B1C66367D00BAFCD8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C38FCD9E23274F9453403D2B /* Pods-PABL.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = PABL/Info.plist;
@@ -504,6 +580,7 @@
 		};
 		CDD5472C1C66367D00BAFCD8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 308398420D766224CC4ECCDB /* Pods-PABL.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = PABL/Info.plist;
