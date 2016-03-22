@@ -15,4 +15,7 @@ typedef void (^NSURLSessionProgressBlock)(NSProgress *progress);
 
 @interface PABLGarage : NSObject
 
++ (NSInteger)sendGet:(NSString*)url parameters:(id)parameters success:(NSURLSessionSuccessBlock)success failure:(NSURLSessionFailBlock)failure;
++ (NSInteger)sendPost:(NSString*)url parameters:(NSDictionary*)parameters success:(NSURLSessionSuccessBlock)success failure:(NSURLSessionFailBlock)failure;
+
 @end

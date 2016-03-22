@@ -488,7 +488,7 @@
     if (_menuSpreadButton == nil) {
         _menuSpreadButton = [[UIView alloc]init];
         [_menuSpreadButton.layer setBorderWidth:0.5f];
-        [_menuSpreadButton.layer setBorderColor:[UIColor blackColor].CGColor];
+        [_menuSpreadButton.layer setBorderColor:[UIColor lightGrayColor].CGColor];
         [_menuSpreadButton setBackgroundColor:HEXCOLOR(0x5CD1E5FF)];
     }
     return _menuSpreadButton;

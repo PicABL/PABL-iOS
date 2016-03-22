@@ -7,6 +7,7 @@
 //
 
 #import "PABLMenuView.h"
+#import "PABLChannelListView.h"
 #import "Common.h"
 
 #define DEFAULT_SIZE CGSizeMake(100, 100)
@@ -16,7 +17,7 @@
 @interface PABLMenuView () <UIGestureRecognizerDelegate, UIScrollViewDelegate, PABLPhotoViewDelegate>
 
 @property (nonatomic, strong) UIView *headerView;
-@property (nonatomic, strong) UIView *channelListView;
+@property (nonatomic, strong) PABLChannelListView *channelListView;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, assign) CGFloat minHeight;
 @property (nonatomic, assign) CGFloat maxHeight;
@@ -238,10 +239,9 @@
     return _headerView;
 }
 
-- (UIView *)channelListView {
+- (PABLChannelListView *)channelListView {
     if (_channelListView == nil) {
-        _channelListView = [[UIView alloc]init];
-        [_channelListView setBackgroundColor:HEXCOLOR(0x000000CC)];
+        _channelListView = [[PABLChannelListView alloc]init];
     }
     return _channelListView;
 }
