@@ -53,30 +53,54 @@ NSString *DataSessionIdentifier = @"PABL_data_session";
     NSLog(@"request url : %@",url);
     
     NSError *error;
-    
-    AFURLSessionManager *sessionManager = [self dataSessionManager];
-    
     NSMutableDictionary *editableParameters = [NSMutableDictionary dictionaryWithDictionary:parameters];
     NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] requestWithMethod:method URLString:url parameters:editableParameters error:&error];
     [request setValue:@"" forHTTPHeaderField:@"User-Agent"];
     [request setValue:@"" forHTTPHeaderField:@"Accept-Language"];
     [request setTimeoutInterval:kRequestTimeout];
-    NSURLSessionDataTask *dataTask = [sessionManager dataTaskWithRequest:request uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
-    } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
-        
-    } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-        if (error) {
-            if (failure) {
-                failure(responseObject, error);
-            }
-        } else {
+//    AFURLSessionManager *sessionManager = [self dataSessionManager];
+//    NSURLSessionDataTask *dataTask = [sessionManager dataTaskWithRequest:request
+//                                                          uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
+//                                                          } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
+//                                                          } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+//                                                              if (error) {
+//                                                                  if (failure) {
+//                                                                      failure(responseObject, error);
+//                                                                  }
+//                                                              } else {
+//                                                                  if (success) {
+//                                                                      success(responseObject);
+//                                                                  }
+//                                                              }
+//                                                          }];
+//    [dataTask resume];
+    AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
+    if ([method isEqualToString:@"GET"]) {
+        [sessionManager GET:url parameters:editableParameters progress:^(NSProgress * _Nonnull downloadProgress) {
+            
+        } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
             if (success) {
                 success(responseObject);
             }
-        }
-    }];
+        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            if (failure) {
+                failure(nil, error);
+            }
+        }];
+    } else if ([method isEqualToString:@"POST"]) {
+        [sessionManager POST:url parameters:editableParameters progress:^(NSProgress * _Nonnull uploadProgress) {
+            
+        } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            if (success) {
+                success(responseObject);
+            }
+        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            if (failure) {
+                failure(nil, error);
+            }
+        }];
+    }
     
-    [dataTask resume];
     
     return 0;
 }

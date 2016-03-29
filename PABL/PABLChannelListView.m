@@ -28,7 +28,7 @@
 }
 
 - (void)didChannelListTouched {
-    
+    [[PABLGarageCar sharedInstance] sendPingTest];
 }
 
 @end

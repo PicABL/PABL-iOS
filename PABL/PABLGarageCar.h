@@ -10,4 +10,8 @@
 
 @interface PABLGarageCar : NSObject
 
++ (PABLGarageCar *)sharedInstance;
+
+- (void)sendPingTest;
+
 @end

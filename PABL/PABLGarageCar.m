@@ -13,10 +13,23 @@
 
 #define BOXSTER @"/ping"
 
+static PABLGarageCar *instance = nil;
+
 @implementation PABLGarageCar
 
 - (NSString *)mergeRequestURLWithBrand:(NSString *)brand withModel:(NSString *)model {
     return [NSString stringWithFormat:@"%@%@",brand,model];
+}
+
++ (PABLGarageCar *)sharedInstance {
+    if (instance == nil) {
+        @synchronized(self) {
+            if (instance == nil) {
+                instance = [[PABLGarageCar alloc]init];
+            }
+        }
+    }
+    return instance;
 }
 
 - (void)sendPingTest {
