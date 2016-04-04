@@ -9,7 +9,7 @@
 #import "PABLGarageCar.h"
 #import "PABLGarage.h"
 
-#define PORSCHE @"http://localhost:9000"
+#define PORSCHE @"http://cloud.devel.kakao.com:9000"
 
 #define BOXSTER @"/ping"
 
@@ -34,8 +34,14 @@ static PABLGarageCar *instance = nil;
 
 - (void)sendPingTest {
     NSString *requestURL = [self mergeRequestURLWithBrand:PORSCHE withModel:BOXSTER];
-    NSMutableDictionary *parameter = @{@"text":@"aaa"};
-    [PABLGarage sendGet:requestURL parameters:nil success:^(id responseObject) {
+    NSDictionary *parameter = @{@"text":@"aaa"};
+    [PABLGarage sendGet:requestURL parameters:parameter success:^(id responseObject) {
+        NSLog(@"success!");
+    } failure:^(id responseObject, NSError *error) {
+        NSLog(@"fail!");
+    }];
+    
+    [PABLGarage sendPost:requestURL parameters:nil success:^(id responseObject) {
         NSLog(@"success!");
     } failure:^(id responseObject, NSError *error) {
         NSLog(@"fail!");
